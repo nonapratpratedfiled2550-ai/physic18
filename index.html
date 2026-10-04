@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ฟิสิกส์อะตอม ม.6 — สื่อจำลองเชิงโต้ตอบ</title>
+<style>
+  :root {
+    --bg: #07101c;
+    --panel: #0c1728;
+    --panel-2: #101e34;
+    --line: rgba(176, 206, 245, 0.16);
+    --text: #e8f0fc;
+    --muted: #93a6c7;
+    --gold: #e7c78a;
+    --teal: #3ee0c5;
+    --teal-dim: rgba(62, 224, 197, 0.14);
+    --amber: #ffc56a;
+    --red: #ff8d7a;
+    --meter: #b8ffcf;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background:
+      radial-gradient(1200px 500px at 20% -10%, rgba(62, 224, 197, 0.08), transparent 50%),
+      radial-gradient(900px 480px at 100% 0%, rgba(231, 199, 138, 0.07), transparent 46%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Leelawadee UI", Tahoma, "Segoe UI", sans-serif;
+    font-size: 14.5px;
+    line-height: 1.45;
+  }
+  header {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(7, 16, 28, 0.9);
+  }
+  header h1 { font-size: 20px; margin: 0; font-weight: 700; letter-spacing: 0.01em; }
+  header h1 span { color: var(--gold); }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
+  .layout {
+    height: calc(100vh - 64px);
+    display: grid;
+    grid-template-columns: 318px minmax(0, 1fr) 368px;
+    gap: 12px;
+    padding: 12px;
+  }
+  .col {
+    min-height: 0;
+    overflow: auto;
+    background: rgba(12, 23, 40, 0.92);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+  }
+  .col.center {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .pad { padding: 14px; }
+  h2 { font-size: 13px; margin: 14px 0 8px; color: var(--gold); font-weight: 700; letter-spacing: 0.02em; }
+  h2:first-child { margin-top: 0; }
+  label.row, .slider-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  .val { color: var(--text); font-variant-numeric: tabular-nums; }
+  select, input[type="range"] { width: 100%; }
+  select {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 13.5px;
+  }
+  input[type="range"] { accent-color: var(--teal); }
+  .transport { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  button {
+    font-family: inherit;
+    font-size: 13.5px;
+    color: var(--text);
+    background: #16263d;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+  }
+  button:hover { border-color: rgba(62, 224, 197, 0.55); }
+  button.active, button.sel { background: var(--teal-dim); border-color: var(--teal); color: #d9fff6; }
+  button.primary { background: #13584c; border-color: #1c8f7c; }
+  button.wide { grid-column: 1 / -1; }
+  .choices { display: flex; flex-wrap: wrap; gap: 6px; }
+  .choices button { flex: 1 1 auto; }
+  .panel { display: none; }
+  .modecol.m1 .panel.o1,
+  .modecol.m2 .panel.o2,
+  .modecol.m3 .panel.o3,
+  .modecol.m4 .panel.o4,
+  .modecol.m5 .panel.o5 { display: block; }
+  .only { display: none; }
+  .m1 .o1, .m2 .o2, .m3 .o3, .m4 .o4, .m5 .o5 { display: block; }
+  .m1 .meters.o1, .m2 .meters.o2, .m3 .meters.o3, .m4 .meters.o4, .m5 .meters.o5 { display: grid; }
+  .hidden { display: none !important; }
+  .rainbow {
+    position: relative;
+    height: 10px;
+    margin: 6px 0 12px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #6d5cff 0%, #304ffe 18%, #00e5ff 34%, #00e676 48%, #ffee58 66%, #ff9100 80%, #ff1744 100%);
+  }
+  .rainbow i {
+    position: absolute;
+    top: -3px;
+    width: 4px;
+    height: 16px;
+    background: white;
+    border-radius: 2px;
+    transform: translateX(-2px);
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.35);
+  }
+  .hintline { color: var(--muted); font-size: 12.5px; margin: 6px 0 0; }
+  .stage {
+    flex: 1;
+    min-height: 460px;
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: #070d18;
+  }
+  #sim { width: 100%; height: 100%; display: block; }
+  .hud {
+    position: absolute;
+    left: 12px; right: 12px; top: 10px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    font-size: 13px;
+  }
+  .hud b { font-weight: 700; }
+  #caption, #legend { margin: 0; color: var(--muted); font-size: 13px; }
+  #caption { color: var(--text); }
+  .block { padding: 12px 12px 4px; }
+  .graph {
+    width: 100%;
+    height: 196px;
+    display: block;
+    border-radius: 10px;
+    background: #0b1424;
+    margin-bottom: 8px;
+  }
+  .gtitle { margin: 0 0 6px; font-size: 13px; color: var(--text); font-weight: 700; }
+  .meters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-bottom: 8px; }
+  .meters.only, .cards.only { display: none; }
+  .m1 .cards.o1, .m2 .cards.o2, .m3 .cards.o3, .m4 .cards.o4, .m5 .cards.o5 { display: block; }
+  .m1 .meters.o1, .m2 .meters.o2, .m3 .meters.o3, .m4 .meters.o4, .m5 .meters.o5 { display: grid; }
+  .meter {
+    background: #071018;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 8px 10px;
+  }
+  .meter .k { color: var(--muted); font-size: 12px; }
+  .meter .v {
+    color: var(--meter);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 20px;
+    letter-spacing: 0.02em;
+  }
+  .meter.hot { border-color: rgba(184, 255, 207, 0.45); }
+  .cards p { margin: 0 0 6px; }
+  .eq {
+    background: #091321;
+    border-left: 3px solid var(--gold);
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    margin-bottom: 8px;
+  }
+  .mis {
+    margin: 8px 12px 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(62, 224, 197, 0.08);
+    border: 1px solid rgba(62, 224, 197, 0.28);
+  }
+  .mis.warn {
+    background: rgba(255, 197, 106, 0.08);
+    border-color: rgba(255, 197, 106, 0.4);
+  }
+  .mis h3 { margin: 0 0 4px; font-size: 13px; color: var(--teal); }
+  .mis.warn h3 { color: var(--amber); }
+  .mis p { margin: 0; color: var(--text); }
+  .consts {
+    color: var(--muted);
+    font-size: 11.5px;
+    padding: 0 12px 14px;
+    margin: 0;
+  }
+  .keys { color: var(--muted); font-size: 12px; margin-top: 10px; }
+  @media (max-width: 1180px) {
+    body { height: auto; }
+    .layout { height: auto; grid-template-columns: 1fr; }
+    .stage { height: 72vh; }
+    header { height: auto; padding: 12px 14px; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>ฟิสิกส์<span>อะตอม</span></h1>
+    <p>สื่อจำลองเชิงโต้ตอบ · ฟิสิกส์เพิ่มเติม ม.6 · ตามแนวแบบเรียน สสวท.</p>
+  </div>
+</header>
+<div class="layout">
+  <section class="col pad modecol m1" id="leftCol">
+    <h2>โหมดการทดลอง</h2>
+    <select id="modeSelect">
+      <option value="1">1. การกระเจิงรังสีแอลฟาของรัทเทอร์ฟอร์ด</option>
+      <option value="2">2. ปรากฏการณ์โฟโตอิเล็กทริก</option>
+      <option value="3">3. แบบจำลองอะตอมของโบร์และสเปกตรัมไฮโดรเจน</option>
+      <option value="4">4. ความยาวคลื่นเดอบรอยล์และการเลี้ยวเบนอิเล็กตรอน</option>
+      <option value="5">5. หลักความไม่แน่นอนและแบบจำลองกลุ่มหมอก</option>
+    </select>
+    <div class="transport">
+      <button type="button" class="primary" id="playBtn">เริ่ม</button>
+      <button type="button" id="pauseBtn">หยุดชั่วคราว</button>
+      <button type="button" id="stepBtn">ทีละครั้ง</button>
+      <button type="button" id="resetBtn">ตั้งค่าใหม่</button>
+    </div>
+    <p class="hintline" id="stepHint">ยิงอนุภาคแอลฟาหนึ่งอนุภาค</p>
+
+    <div class="panel o1">
+      <h2>แผ่นโลหะและพลังงานแอลฟา</h2>
+      <div class="slider-label"><span>พลังงานจลน์ของอนุภาคแอลฟา</span><span class="val" id="energyOut">5.0 MeV</span></div>
+      <input type="range" id="energySlider" min="1" max="10" step="0.1" value="5">
+      <p class="hintline">ชนิดแผ่นบาง (เลขอะตอม Z)</p>
+      <div class="choices" id="zChoices">
+        <button type="button" class="sel" data-z="79">ทองคำ 79</button>
+        <button type="button" data-z="29">ทองแดง 29</button>
+        <button type="button" data-z="13">อะลูมิเนียม 13</button>
+      </div>
+      <p class="hintline">คลิกบนจอจำลองเพื่อยิงที่ความสูงนั้น เส้นจางคือแนวโคจรของระยะกระทบต่าง ๆ</p>
+    </div>
+
+    <div class="panel o2">
+      <h2>แสงและขั้วไฟฟ้า</h2>
+      <div class="slider-label"><span>ความยาวคลื่นแสง λ</span><span class="val" id="lambdaOut">400 nm</span></div>
+      <input type="range" id="lambdaSlider" min="100" max="800" step="1" value="400">
+      <div class="rainbow" aria-hidden="true"><i id="rainbowMark"></i></div>
+      <div class="choices" id="colorChoices">
+        <button type="button" data-lam="254">UV 254</button>
+        <button type="button" data-lam="405">ม่วง</button>
+        <button type="button" data-lam="450">น้ำเงิน</button>
+        <button type="button" data-lam="532">เขียว</button>
+        <button type="button" data-lam="589">เหลือง</button>
+        <button type="button" data-lam="650">แดง</button>
+        <button type="button" data-lam="760">IR</button>
+      </div>
+      <div class="slider-label" style="margin-top:10px"><span>ความเข้มแสง I</span><span class="val" id="intensityOut">70%</span></div>
+      <input type="range" id="intensitySlider" min="0" max="100" step="1" value="70">
+      <div class="slider-label"><span>ความต่างศักย์ V ของแอโนดเทียบแคโทด</span><span class="val" id="voltageOut">0.00 V</span></div>
+      <input type="range" id="voltageSlider" min="-5" max="5" step="0.05" value="0">
+      <p class="hintline">ค่าลบคือศักย์ย้อนกลับ ค่าบวกคือศักย์เร่ง</p>
+      <h2>แคโทด</h2>
+      <div class="choices" id="metalChoices">
+        <button type="button" class="sel" data-metal="Na" data-w="2.28">โซเดียม 2.28 eV</button>
+        <button type="button" data-metal="Zn" data-w="4.3">สังกะสี 4.3 eV</button>
+        <button type="button" data-metal="Pt" data-w="6.35">แพลทินัม 6.35 eV</button>
+        <button type="button" data-metal="custom">กำหนด W เอง</button>
+      </div>
+      <div id="customBox" class="hidden" style="margin-top:8px">
+        <div class="slider-label"><span>ฟังก์ชันงาน W</span><span class="val" id="wOut">2.28 eV</span></div>
+        <input type="range" id="wSlider" min="1" max="8" step="0.01" value="2.28">
+      </div>
+    </div>
+
+    <div class="panel o3">
+      <h2>การเปลี่ยนระดับพลังงาน</h2>
+      <div class="slider-label"><span>ระดับต้น nᵢ</span></div>
+      <select id="niSelect"></select>
+      <div class="slider-label" style="margin-top:8px"><span>ระดับปลาย n<sub>f</sub></span></div>
+      <select id="nfSelect"></select>
+      <p class="hintline">n_f &lt; nᵢ คือการปล่อยโฟตอน · n_f &gt; nᵢ คือการดูดกลืน · ∞ คือไอออไนเซชัน</p>
+      <h2>อนุกรมสเปกตรัม</h2>
+      <div class="choices" id="seriesChoices">
+        <button type="button" data-nf="1">ไลแมน</button>
+        <button type="button" class="sel" data-nf="2">บัลเมอร์</button>
+        <button type="button" data-nf="3">พาสเชน</button>
+        <button type="button" data-nf="4">แบรกเกต</button>
+        <button type="button" data-nf="5">พฟุนด์</button>
+      </div>
+      <div class="transport">
+        <button type="button" class="wide" id="wrongPhotonBtn">ยิงโฟตอนพลังงานไม่ตรงกับ ΔE</button>
+      </div>
+      <label class="hintline" style="display:flex;align-items:center;gap:8px;margin-top:8px">
+        <input type="checkbox" id="diagramToggle" checked> แสดงแผนภาพระดับพลังงาน
+      </label>
+    </div>
+
+    <div class="panel o4">
+      <h2>ปืนอิเล็กตรอน</h2>
+      <div class="slider-label"><span>ศักย์เร่ง V</span><span class="val" id="vaccOut">2500 V</span></div>
+      <input type="range" id="vaccSlider" min="0" max="1000" step="1" value="799">
+      <p class="hintline">สเกลลอการิทึม 10 V ถึง 10 000 V · สูตรแบบเรียน λ = 1.228 / √V nm</p>
+    </div>
+
+    <div class="panel o5">
+      <h2>ความไม่แน่นอนของตำแหน่ง</h2>
+      <div class="slider-label"><span>Δx</span><span class="val" id="dxOut">0.053 nm</span></div>
+      <input type="range" id="dxSlider" min="8" max="800" step="1" value="53">
+      <div class="choices" style="margin-top:8px">
+        <button type="button" id="bohrRadiusBtn">ตั้ง Δx = รัศมีโบร์</button>
+      </div>
+      <h2>กลุ่มหมอกความน่าจะเป็น</h2>
+      <div class="choices" id="orbitalChoices">
+        <button type="button" class="sel" data-orb="1s">1s</button>
+        <button type="button" data-orb="2s">2s</button>
+        <button type="button" data-orb="2p">2p</button>
+      </div>
+      <p class="hintline">1s ทรงกลม · 2s มีโหนด · 2p สองพู ภาพนี้คือความน่าจะเป็น ไม่ใช่ทางโคจรเส้นบาง</p>
+    </div>
+    <p class="keys">แป้นพิมพ์: Space เริ่ม/หยุด · S ทีละครั้ง · R ตั้งค่าใหม่</p>
+  </section>
+
+  <section class="col center">
+    <div class="stage">
+      <div class="hud"><b id="hudTitle"></b><span id="hudStatus"></span></div>
+      <canvas id="sim"></canvas>
+    </div>
+    <p id="caption"></p>
+    <p id="legend"></p>
+  </section>
+
+  <aside class="col modecol m1" id="rightCol">
+    <div class="block meters only o2">
+      <div class="meter" id="ammeterBox"><div class="k">แอมมิเตอร์ · กระแสโฟโตอิเล็กตรอน</div><div class="v" id="ammeter">0.00 µA</div></div>
+      <div class="meter" id="voltmeterBox"><div class="k">โวลต์มิเตอร์ · V ที่ตั้งไว้</div><div class="v" id="voltmeter">0.00 V</div></div>
+    </div>
+    <div class="block meters only o1">
+      <div class="meter"><div class="k">ยิงแล้ว</div><div class="v" id="countAll">0</div></div>
+      <div class="meter"><div class="k">สะท้อนกลับ θ &gt; 90°</div><div class="v" id="countBack">0</div></div>
+    </div>
+    <div class="block meters only o3">
+      <div class="meter"><div class="k">ΔE ของการเปลี่ยนระดับ</div><div class="v" id="meterDE">—</div></div>
+      <div class="meter"><div class="k">ความยาวคลื่นโฟตอน</div><div class="v" id="meterLam">—</div></div>
+    </div>
+    <div class="block meters only o4">
+      <div class="meter"><div class="k">λ เดอบรอยล์</div><div class="v" id="meterDb">—</div></div>
+      <div class="meter"><div class="k">อัตราเร็วอิเล็กตรอน</div><div class="v" id="meterSpeed">—</div></div>
+    </div>
+    <div class="block meters only o5">
+      <div class="meter"><div class="k">Δx</div><div class="v" id="meterDx">—</div></div>
+      <div class="meter"><div class="k">Δp ต่ำสุด</div><div class="v" id="meterDp">—</div></div>
+    </div>
+
+    <div class="block">
+      <p class="gtitle" id="gTitleA"></p>
+      <canvas class="graph" id="graphA"></canvas>
+      <p class="gtitle" id="gTitleB"></p>
+      <canvas class="graph" id="graphB"></canvas>
+    </div>
+
+    <div class="block cards only o1" id="cards1"></div>
+    <div class="block cards only o2" id="cards2"></div>
+    <div class="block cards only o3" id="cards3"></div>
+    <div class="block cards only o4" id="cards4"></div>
+    <div class="block cards only o5" id="cards5"></div>
+
+    <div class="mis" id="misBox">
+      <h3 id="misTitle">ข้อควรสังเกต</h3>
+      <p id="misText"></p>
+    </div>
+    <p class="consts">ค่าคงที่ตามแบบเรียน: h = 6.626×10⁻³⁴ J·s = 4.14×10⁻¹⁵ eV·s · hc ≈ 1240 eV·nm · R_H = 1.097×10⁷ m⁻¹ · r₁ = 0.053 nm · E₁ = −13.6 eV</p>
+  </aside>
+</div>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const H_EV = 4.14e-15;
+  const HC = 1240;
+  const K_FM = 1.44;
+  const METALS = {
+    79: { name: "ทองคำ", A: 197, symbol: "Au" },
+    29: { name: "ทองแดง", A: 64, symbol: "Cu" },
+    13: { name: "อะลูมิเนียม", A: 27, symbol: "Al" }
+  };
+  const SERIES = { 1: "ไลแมน", 2: "บัลเมอร์", 3: "พาสเชน", 4: "แบรกเกต", 5: "พฟุนด์", 6: "ฮัมฟรีย์" };
+
+  const state = {
+    mode: 1, run: "stop", hint: "default",
+    energy: 5, Z: 79,
+    lambda: 400, intensity: 70, voltage: 0, W: 2.28, metal: "Na",
+    ni: 3, nf: 2, displayN: 3, showDiagram: true,
+    vacc: 2500, dxNm: 0.053, orbital: "1s",
+    alphas: [], hits: [], hist: Array(18).fill(0), total: 0, back: 0, wide: 0, last: null, ghosts: [],
+    photons: [], electrons: [], anodeFlash: 0,
+    anim: null, angle: 0.6, cooldown: 0.4,
+    dbPts: [], wavePhase: 0, ringPulse: 0,
+    cloud: [], cloudRot: 0.4, proj: [], packetT: 0,
+    spawnN: 0, acc: 0, photoAcc: 0, dbAcc: 0
+  };
+
+  const sim = $("sim");
+  const graphA = $("graphA");
+  const graphB = $("graphB");
+  const sizeCache = new WeakMap();
+
+  function sup(n) {
+    const map = { "-": "⁻", "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
+    return String(n).replace(/./g, (c) => map[c] || c);
+  }
+  function sci(v, digits = 3) {
+    if (!isFinite(v)) return "—";
+    if (v === 0) return "0";
+    const sign = v < 0 ? "−" : "";
+    const a = Math.abs(v);
+    if (a >= 0.01 && a < 10000) {
+      const d = a >= 100 ? 1 : a >= 10 ? 2 : 2;
+      return sign + a.toFixed(d);
+    }
+    const exp = Math.floor(Math.log10(a));
+    const m = a / 10 ** exp;
+    return sign + m.toFixed(Math.max(0, digits - 1)) + "×10" + sup(exp);
+  }
+  function fixed(v, d) {
+    if (!isFinite(v)) return "—";
+    const sign = v < 0 ? "−" : "";
+    return sign + Math.abs(v).toFixed(d);
+  }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function smooth(t) { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); }
+  function rgbHex(r, g, b) {
+    const h = (n) => n.toString(16).padStart(2, "0");
+    return "#" + h(r) + h(g) + h(b);
+  }
+  function wavelengthColor(nm) {
+    if (nm < 380) return { r: 130, g: 96, b: 255, hex: "#8260ff", band: "อัลตราไวโอเลต (ตามองไม่เห็น)" };
+    if (nm > 750) return { r: 176, g: 36, b: 48, hex: "#b02430", band: "อินฟราเรด (ตามองไม่เห็น)" };
+    let r = 0, g = 0, b = 0;
+    if (nm < 440) { r = -(nm - 440) / 60; b = 1; }
+    else if (nm < 490) { g = (nm - 440) / 50; b = 1; }
+    else if (nm < 510) { g = 1; b = -(nm - 510) / 20; }
+    else if (nm < 580) { r = (nm - 510) / 70; g = 1; }
+    else if (nm < 645) { r = 1; g = -(nm - 645) / 65; }
+    else r = 1;
+    let f = 1;
+    if (nm < 420) f = 0.35 + 0.65 * (nm - 380) / 40;
+    else if (nm > 700) f = 0.35 + 0.65 * (750 - nm) / 50;
+    const gamma = 0.8;
+    const R = Math.round(255 * Math.pow(clamp(r * f, 0, 1), gamma));
+    const G = Math.round(255 * Math.pow(clamp(g * f, 0, 1), gamma));
+    const B = Math.round(255 * Math.pow(clamp(b * f, 0, 1), gamma));
+    const name = nm < 450 ? "ม่วง" : nm < 495 ? "น้ำเงิน" : nm < 570 ? "เขียว" : nm < 590 ? "เหลือง" : nm < 620 ? "ส้ม" : "แดง";
+    return { r: R, g: G, b: B, hex: rgbHex(R, G, B), band: "แสงที่ตามองเห็น สี" + name };
+  }
+  function cssColor(c, a = 1) { return `rgba(${c.r},${c.g},${c.b},${a})`; }
+
+  function closestApproach(Z, E) { return (K_FM * 2 * Z) / E; }
+  function nuclearRadius(Z) { return 1.2 * Math.cbrt(METALS[Z].A); }
+  function scatterAngle(b, D) {
+    if (Math.abs(b) < 0.35) return Math.PI;
+    return 2 * Math.atan(D / (2 * Math.abs(b)));
+  }
+
+  function buildPath(b, D) {
+    const sign = b >= 0 ? 1 : -1;
+    const bb = Math.abs(b);
+    const pushS = (pts) => {
+      let s = 0;
+      if (!pts.length) return pts;
+      pts[0].s = 0;
+      for (let i = 1; i < pts.length; i++) {
+        s += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+        pts[i].s = s;
+      }
+      return pts;
+    };
+    if (bb < 0.4) {
+      const pts = [];
+      for (let x = -840; x <= -D; x += 6) pts.push({ x, y: 0 });
+      for (let x = -D; x >= -840; x -= 6) pts.push({ x, y: 0 });
+      return { pts: pushS(pts), theta: Math.PI, b, D, total: 0, ready() { this.total = this.pts.at(-1)?.s || 0; return this; } }.ready();
+    }
+    const e = Math.sqrt(1 + (2 * bb / D) ** 2);
+    const thetaInf = Math.acos(Math.min(0.999999, 1 / e));
+    const a = D / 2;
+    const thetaS = Math.PI - 2 * thetaInf;
+    const peri = Math.PI - (sign * (Math.PI - thetaS)) / 2;
+    const raw = [];
+    const n = 180;
+    for (let i = 0; i <= n; i++) {
+      const phi = -thetaInf + 0.0025 + ((2 * thetaInf - 0.005) * i) / n;
+      const denom = e * Math.cos(phi) - 1;
+      if (denom < 8e-5) continue;
+      const r = (a * (e * e - 1)) / denom;
+      if (!(r > 0) || r > 1600) continue;
+      const ang = peri + sign * phi;
+      raw.push({ x: r * Math.cos(ang), y: r * Math.sin(ang) });
+    }
+    raw.reverse();
+    let pts = raw.filter((p) => Math.hypot(p.x, p.y) <= 860);
+    if (pts.length && pts[0].x > -760) pts.unshift({ x: -840, y: b });
+    if (pts.length < 2) pts = raw.slice(0, 8);
+    return { pts: pushS(pts), theta: thetaS, b, D, total: pts.at(-1)?.s || 0 };
+  }
+
+  function rebuildGhosts() {
+    const D = closestApproach(state.Z, state.energy);
+    const bs = [8, 16, 28, 48, 80, 130, 200, 300];
+    state.ghosts = [];
+    bs.forEach((b) => {
+      state.ghosts.push(buildPath(b, D));
+      state.ghosts.push(buildPath(-b, D));
+    });
+  }
+
+  function posAlong(pts, s, idxRef) {
+    if (!pts.length) return { x: 0, y: 0 };
+    if (s <= 0) return pts[0];
+    let i = idxRef.i || 1;
+    if (i < 1) i = 1;
+    while (i < pts.length && pts[i].s < s) i++;
+    idxRef.i = i;
+    if (i >= pts.length) return pts[pts.length - 1];
+    const a = pts[i - 1];
+    const b = pts[i];
+    const t = (s - a.s) / (b.s - a.s || 1);
+    return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+  }
+
+  function sampleB() {
+    state.spawnN++;
+    if (state.spawnN % 7 === 0) {
+      const slots = [5, -7, 12, -15, 24, -32, 9, -11];
+      return slots[state.spawnN % slots.length];
+    }
+    const R = 320;
+    return (Math.random() < 0.5 ? 1 : -1) * R * Math.sqrt(Math.random());
+  }
+
+  function spawnAlpha(b) {
+    const D = closestApproach(state.Z, state.energy);
+    const path = buildPath(b, D);
+    if (!path.pts.length) return;
+    const end = path.pts[path.pts.length - 1];
+    state.alphas.push({
+      path, s: 0, idx: { i: 1 }, trail: [], b,
+      theta: path.theta, D, endx: end.x, endy: end.y,
+      color: path.theta > Math.PI / 2 ? "#ff7a72" : path.theta > Math.PI / 6 ? "#ffd36a" : "#79f3d8"
+    });
+  }
+
+  function clearRutherfordRun() {
+    state.alphas = [];
+    state.hits = [];
+    state.hist = Array(18).fill(0);
+    state.total = 0;
+    state.back = 0;
+    state.wide = 0;
+    state.last = null;
+  }
+
+  function recordAlpha(p) {
+    const deg = clamp((p.theta * 180) / Math.PI, 0, 180);
+    state.hist[Math.min(17, Math.floor(deg / 10))]++;
+    state.total++;
+    if (deg > 90) state.back++;
+    if (deg > 20) state.wide++;
+    state.last = { b: p.b, deg };
+    state.hits.push({ x: p.endx, y: p.endy, life: 1, deg });
+  }
+
+  function photoCalc() {
+    const lam = state.lambda;
+    const W = state.W;
+    const E = HC / lam;
+    const Ek = Math.max(0, E - W);
+    const active = E > W + 1e-6;
+    const I = photoCurrent(state.voltage, state.intensity, Ek, active);
+    return {
+      E, Ek, W, lam, active, Vs: Ek, I,
+      f: E / H_EV, f0: W / H_EV, lam0: HC / W,
+      EJ: E * 1.6e-19, EkJ: Ek * 1.6e-19
+    };
+  }
+  function photoCurrent(V, intensity, Vs, active) {
+    if (!active || intensity <= 0 || Vs <= 1e-6) return 0;
+    const Isat = 5 * (intensity / 100);
+    if (V >= 0) return Isat;
+    if (V <= -Vs) return 0;
+    return Isat * Math.pow((V + Vs) / Vs, 0.7);
+  }
+
+  function levelEnergy(n) { return isFinite(n) ? -13.6 / (n * n) : 0; }
+  function transition(ni, nf) {
+    const Ei = levelEnergy(ni);
+    const Ef = levelEnergy(nf);
+    const dE = Math.abs(Ef - Ei);
+    const inv = Math.abs((isFinite(nf) ? 1 / (nf * nf) : 0) - (isFinite(ni) ? 1 / (ni * ni) : 0));
+    return {
+      Ei, Ef, dE, inv,
+      lam: dE > 1e-8 ? HC / dE : Infinity,
+      lamR: inv > 0 ? 1e9 / (1.097e7 * inv) : Infinity,
+      emit: nf < ni
+    };
+  }
+  function seriesName(ni, nf) {
+    const low = Math.min(isFinite(ni) ? ni : 99, isFinite(nf) ? nf : 99);
+    if (!isFinite(ni) || !isFinite(nf)) {
+      if (!isFinite(nf)) return "ไอออไนเซชัน";
+      if (!isFinite(ni)) return "การรวมตัวกลับเป็นอะตอม";
+    }
+    return SERIES[low] || "การเปลี่ยนระดับ";
+  }
+
+  function debroglieCalc() {
+    const V = state.vacc;
+    const lam = 1.228 / Math.sqrt(V);
+    const v = 5.93e5 * Math.sqrt(V);
+    const p = 9.11e-31 * v;
+    return { V, lam, v, p, lamH: (6.626e-34 / p) * 1e9 };
+  }
+  function braggRings(lam) {
+    const d = 0.213;
+    const rings = [];
+    for (let n = 1; n <= 7; n++) {
+      const s = (n * lam) / (2 * d);
+      if (s >= 0.999) break;
+      const theta = Math.asin(s);
+      const phi = 2 * theta;
+      rings.push({ n, theta, phi, onScreen: Math.tan(phi) < 0.7 });
+    }
+    return rings;
+  }
+
+  function uncCalc() {
+    const dx = state.dxNm * 1e-9;
+    const dp = 6.626e-34 / (4 * Math.PI * dx);
+    const dv = dp / 9.11e-31;
+    return { dx, dp, dv, limit: 6.626e-34 / (4 * Math.PI), product: dx * dp };
+  }
+
+  function sampleCloud(orbital, count) {
+    const pts = [];
+    const limit = orbital === "1s" ? 7.5 : 13;
+    const pmax = orbital === "1s" ? 1 : orbital === "2s" ? 4 : 0.55;
+    let guard = 0;
+    while (pts.length < count && guard < count * 90) {
+      guard++;
+      const x = (Math.random() * 2 - 1) * limit;
+      const y = (Math.random() * 2 - 1) * limit;
+      const z = (Math.random() * 2 - 1) * limit;
+      const rho = Math.hypot(x, y, z);
+      let dens;
+      if (orbital === "1s") dens = Math.exp(-2 * rho);
+      else if (orbital === "2s") {
+        const a = (2 - rho) * Math.exp(-rho / 2);
+        dens = a * a;
+      } else {
+        const cos = rho < 1e-6 ? 0 : z / rho;
+        const a = rho * Math.exp(-rho / 2);
+        dens = a * a * cos * cos;
+      }
+      if (Math.random() < dens / pmax) pts.push({ x, y, z });
+    }
+    return pts;
+  }
+
+  function fitCanvas(canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.max(2, Math.round(rect.width));
+    const h = Math.max(2, Math.round(rect.height));
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    let cache = sizeCache.get(canvas);
+    if (!cache || cache.w !== w || cache.h !== h || cache.dpr !== dpr) {
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cache = { w, h, dpr, ctx };
+      sizeCache.set(canvas, cache);
+    }
+    return cache;
+  }
+
+  function font(ctx, size, weight = "400") {
+    ctx.font = `${weight} ${size}px Leelawadee UI, Tahoma, sans-serif`;
+  }
+
+  function camera(w, h) {
+    const worldW = 1800;
+    const worldH = 1500;
+    const scale = Math.min((w - 20) / worldW, (h - 20) / worldH);
+    const ox = (w - worldW * scale) / 2;
+    const oy = (h - worldH * scale) / 2;
+    return {
+      scale, ox, oy,
+      X: (x) => ox + (x + 900) * scale,
+      Y: (y) => oy + (750 - y) * scale
+    };
+  }
+
+  function drawLab(ctx, w, h) {
+    const g = ctx.createRadialGradient(w * 0.45, h * 0.4, 30, w * 0.5, h * 0.5, w * 0.75);
+    g.addColorStop(0, "#14233c");
+    g.addColorStop(1, "#070d18");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  function angleColor(deg, alpha) {
+    const c = deg > 90 ? "255,122,114" : deg > 30 ? "255,211,106" : "121,243,216";
+    return `rgba(${c},${alpha})`;
+  }
+
+  function drawRutherford(ctx, w, h) {
+    drawLab(ctx, w, h);
+    const cam = camera(w, h);
+    const D = closestApproach(state.Z, state.energy);
+    const R = nuclearRadius(state.Z);
+    const metal = METALS[state.Z];
+    ctx.save();
+    ctx.strokeStyle = "rgba(231,199,138,0.35)";
+    ctx.setLineDash([4, 6]);
+    ctx.beginPath();
+    ctx.arc(cam.X(0), cam.Y(0), 800 * cam.scale, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    const foil = ctx.createLinearGradient(cam.X(-8), 0, cam.X(8), 0);
+    const foilColor = state.Z === 79 ? "#e7c78a" : state.Z === 29 ? "#e39a72" : "#d5dee8";
+    foil.addColorStop(0, "rgba(0,0,0,0)");
+    foil.addColorStop(0.5, foilColor);
+    foil.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = foil;
+    ctx.globalAlpha = 0.55;
+    ctx.fillRect(cam.X(-10), cam.Y(760), 20 * cam.scale, (cam.Y(-760) - cam.Y(760)));
+    ctx.globalAlpha = 1;
+
+    ctx.lineWidth = 1.4;
+    state.ghosts.forEach((g) => {
+      const deg = (g.theta * 180) / Math.PI;
+      ctx.strokeStyle = angleColor(deg, 0.28);
+      ctx.beginPath();
+      g.pts.forEach((p, i) => {
+        const x = cam.X(p.x);
+        const y = cam.Y(p.y);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    });
+
+    state.alphas.forEach((p) => {
+      ctx.strokeStyle = p.color;
+      ctx.globalAlpha = 0.9;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      p.trail.forEach((q, i) => {
+        if (i === 0) ctx.moveTo(cam.X(q.x), cam.Y(q.y));
+        else ctx.lineTo(cam.X(q.x), cam.Y(q.y));
+      });
+      ctx.stroke();
+      const pos = p.trail.at(-1);
+      if (pos) {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(cam.X(pos.x), cam.Y(pos.y), 4.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+    ctx.globalAlpha = 1;
+
+    state.hits.forEach((hit) => {
+      ctx.fillStyle = angleColor(hit.deg, hit.life);
+      ctx.beginPath();
+      ctx.arc(cam.X(hit.x), cam.Y(hit.y), 5 + 8 * (1 - hit.life), 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    ctx.setLineDash([3, 4]);
+    ctx.strokeStyle = "rgba(255,255,255,0.45)";
+    ctx.beginPath();
+    ctx.arc(cam.X(0), cam.Y(0), Math.max(4, D * cam.scale), 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    const nr = Math.max(3.2, R * cam.scale);
+    const glow = ctx.createRadialGradient(cam.X(0), cam.Y(0), 1, cam.X(0), cam.Y(0), nr * 7);
+    glow.addColorStop(0, "rgba(255,230,170,0.95)");
+    glow.addColorStop(1, "rgba(255,230,170,0)");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cam.X(0), cam.Y(0), nr * 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#fff4d2";
+    ctx.beginPath();
+    ctx.arc(cam.X(0), cam.Y(0), nr, 0, Math.PI * 2);
+    ctx.fill();
+
+    const sy = cam.Y(0);
+    const boxX = Math.max(14, cam.X(-820));
+    ctx.fillStyle = "#1c3148";
+    ctx.strokeStyle = "#8eb4d8";
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, boxX, sy - 26, 74, 52, 8);
+    ctx.fill();
+    ctx.stroke();
+    font(ctx, 13, "700");
+    ctx.fillStyle = "#d5e6f8";
+    ctx.fillText("แหล่ง α", boxX + 12, sy + 5);
+
+    font(ctx, 13, "700");
+    ctx.fillStyle = "#f3e2bc";
+    ctx.fillText("แผ่น" + metal.name + "  Z = " + state.Z, cam.X(24), cam.Y(640));
+    font(ctx, 12);
+    ctx.fillStyle = "#c9d7ea";
+    ctx.fillText("d₀", cam.X(D) + 6, cam.Y(0) - 6);
+    const bar = 100 * cam.scale;
+    ctx.strokeStyle = "#d5e2f5";
+    ctx.beginPath();
+    ctx.moveTo(18, h - 22);
+    ctx.lineTo(18 + bar, h - 22);
+    ctx.moveTo(18, h - 26);
+    ctx.lineTo(18, h - 18);
+    ctx.moveTo(18 + bar, h - 26);
+    ctx.lineTo(18 + bar, h - 18);
+    ctx.stroke();
+    font(ctx, 12);
+    ctx.fillStyle = "#d5e2f5";
+    ctx.fillText("100 fm", 18, h - 30);
+    ctx.restore();
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function photoLayout(w, h) {
+    return {
+      cathodeX: w * 0.30,
+      anodeX: w * 0.73,
+      top: h * 0.24,
+      bot: h * 0.70,
+      mid: h * 0.47
+    };
+  }
+
+  function drawPhoto(ctx, w, h) {
+    drawLab(ctx, w, h);
+    const L = photoLayout(w, h);
+    const col = wavelengthColor(state.lambda);
+    const ph = photoCalc();
+    ctx.save();
+    const tubeG = ctx.createLinearGradient(0, L.top, 0, L.bot);
+    tubeG.addColorStop(0, "rgba(120,170,210,0.08)");
+    tubeG.addColorStop(1, "rgba(120,170,210,0.16)");
+    ctx.fillStyle = tubeG;
+    ctx.strokeStyle = "rgba(180,220,245,0.65)";
+    ctx.lineWidth = 2;
+    roundRect(ctx, w * 0.16, L.top - 16, w * 0.70, L.bot - L.top + 32, 80);
+    ctx.fill();
+    ctx.stroke();
+    font(ctx, 13);
+    ctx.fillStyle = "#9eb0c8";
+    ctx.fillText("หลอดสุญญากาศ", w * 0.46, L.top + 4);
+
+    const lampX = w * 0.07;
+    const lampY = L.mid;
+    const glow = ctx.createRadialGradient(lampX, lampY, 4, lampX, lampY, 46 + state.intensity * 0.35);
+    glow.addColorStop(0, cssColor(col, 0.2 + state.intensity / 140));
+    glow.addColorStop(1, cssColor(col, 0));
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(lampX, lampY, 48 + state.intensity * 0.25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = state.intensity > 0 ? col.hex : "#243246";
+    ctx.beginPath();
+    ctx.arc(lampX, lampY, 14, 0, Math.PI * 2);
+    ctx.fill();
+    font(ctx, 12);
+    ctx.fillStyle = "#d5e2f5";
+    ctx.fillText("แหล่งแสง", lampX - 22, lampY + 36);
+
+    const metalColor = state.metal === "Na" ? "#d7c27a" : state.metal === "Zn" ? "#b7c4d6" : state.metal === "Pt" ? "#e6e8ee" : "#d9a07a";
+    ctx.fillStyle = metalColor;
+    ctx.fillRect(L.cathodeX - 8, L.top + 20, 14, L.bot - L.top - 40);
+    ctx.strokeStyle = "#9fd4ff";
+    ctx.lineWidth = 2;
+    const aTop = L.top + 24;
+    const aBot = L.bot - 24;
+    for (let i = 0; i < 7; i++) {
+      const y0 = aTop + ((aBot - aTop) * i) / 7;
+      const y1 = y0 + (aBot - aTop) / 14;
+      ctx.beginPath();
+      ctx.moveTo(L.anodeX, y0);
+      ctx.lineTo(L.anodeX, y1);
+      ctx.stroke();
+    }
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(L.anodeX + 8, aTop);
+    ctx.lineTo(L.anodeX + 8, aBot);
+    ctx.stroke();
+    font(ctx, 13, "700");
+    ctx.fillStyle = "#f4e7c4";
+    ctx.fillText("แคโทด", L.cathodeX - 26, L.bot + 28);
+    ctx.fillStyle = "#cfe6ff";
+    ctx.fillText("แอโนด", L.anodeX - 8, L.bot + 28);
+
+    if (Math.abs(state.voltage) > 0.02) {
+      ctx.strokeStyle = state.voltage > 0 ? "rgba(120,255,190,0.8)" : "rgba(255,150,130,0.85)";
+      const dir = state.voltage > 0 ? 1 : -1;
+      for (let i = 0; i < 3; i++) {
+        const y = L.mid - 36 + i * 36;
+        const x1 = (L.cathodeX + L.anodeX) / 2 - 28;
+        drawArrow(ctx, x1, y, x1 + dir * 56, y);
+      }
+      font(ctx, 12);
+      ctx.fillStyle = "#d5e2f5";
+      ctx.fillText(state.voltage > 0 ? "แรงบน e⁻ ไปแอโนด" : "แรงบน e⁻ กลับแคโทด", (L.cathodeX + L.anodeX) / 2 - 70, L.top + 28);
+    }
+
+    state.photons.forEach((p) => {
+      ctx.fillStyle = cssColor(col, 0.95);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    state.electrons.forEach((e) => {
+      ctx.fillStyle = "#8ecbff";
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      font(ctx, 11, "700");
+      ctx.fillStyle = "#062033";
+      ctx.fillText("−", e.x - 4, e.y + 4);
+    });
+
+    const ax = L.anodeX + 28;
+    const ay = L.mid;
+    ctx.beginPath();
+    ctx.strokeStyle = state.anodeFlash > 0 ? "#b8ffcf" : "#7f97b3";
+    ctx.lineWidth = 2;
+    ctx.arc(ax, ay, 16, 0, Math.PI * 2);
+    ctx.stroke();
+    font(ctx, 14, "700");
+    ctx.fillStyle = state.anodeFlash > 0 ? "#b8ffcf" : "#c5d4e8";
+    ctx.fillText("A", ax - 5, ay + 5);
+
+    font(ctx, 13);
+    ctx.fillStyle = ph.active ? "#d9fff4" : "#ffc1b6";
+    const status = !ph.active ? "hf < W  อิเล็กตรอนไม่หลุด" : state.voltage <= -ph.Vs ? "ศักย์ย้อนกลับหยุดอิเล็กตรอนทั้งหมด" : "เกิดโฟโตอิเล็กตรอน";
+    ctx.fillText(status, w * 0.18, h - 28);
+    ctx.fillStyle = "#d5e2f5";
+    ctx.fillText(col.band + "   W = " + fixed(state.W, 2) + " eV", w * 0.18, h - 10);
+    ctx.restore();
+  }
+
+  function drawArrow(ctx, x1, y1, x2, y2) {
+    const ang = Math.atan2(y2 - y1, x2 - x1);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 8 * Math.cos(ang - 0.4), y2 - 8 * Math.sin(ang - 0.4));
+    ctx.lineTo(x2 - 8 * Math.cos(ang + 0.4), y2 - 8 * Math.sin(ang + 0.4));
+    ctx.closePath();
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.fill();
+  }
+
+  function bohrRadiusPx(n, r1) { return isFinite(n) ? r1 * n * n : r1 * 40; }
+
+  function electronState() {
+    const anim = state.anim;
+    if (!anim) {
+      if (!isFinite(state.displayN)) return null;
+      return { rUnit: state.displayN * state.displayN, alpha: 1 };
+    }
+    const t = smooth(anim.t / anim.dur);
+    if (anim.kind === "jump-emit" || anim.kind === "jump-absorb") {
+      const r0 = anim.ni * anim.ni;
+      const r1 = isFinite(anim.nf) ? anim.nf * anim.nf : 46;
+      return { rUnit: r0 + (r1 - r0) * t, alpha: 1 };
+    }
+    if (anim.kind === "escape") {
+      const r0 = anim.ni * anim.ni;
+      return { rUnit: r0 + (48 - r0) * (anim.t / anim.dur), alpha: 1 - anim.t / anim.dur };
+    }
+    if (anim.kind === "capture") {
+      const r1 = anim.nf * anim.nf;
+      return { rUnit: 46 + (r1 - 46) * t, alpha: 1 };
+    }
+    if (anim.kind === "photon-out") {
+      return isFinite(anim.nf) ? { rUnit: anim.nf * anim.nf, alpha: 1 } : null;
+    }
+    if (!isFinite(anim.ni)) return null;
+    return { rUnit: anim.ni * anim.ni, alpha: 1 };
+  }
+
+  function drawBohr(ctx, w, h) {
+    drawLab(ctx, w, h);
+    const show = state.showDiagram && w > 520;
+    const diagramW = show ? Math.min(200, w * 0.30) : 0;
+    const cx = (w - diagramW) * 0.48;
+    const cy = h * 0.52;
+    const maxR = Math.min(cx - 28, h * 0.40, (w - diagramW) - cx - 20);
+    const r1 = maxR / 36;
+    ctx.save();
+    for (let n = 6; n >= 1; n--) {
+      const rr = r1 * n * n;
+      const hot = n === state.ni || n === state.nf;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+      ctx.strokeStyle = hot ? "rgba(255,214,120,0.9)" : "rgba(160,190,220,0.35)";
+      ctx.lineWidth = hot ? 2 : 1;
+      ctx.stroke();
+      font(ctx, 12);
+      ctx.fillStyle = hot ? "#ffe1a3" : "#b7c7da";
+      ctx.fillText("n=" + n, cx + rr + 4, cy + 4);
+    }
+    ctx.fillStyle = "#f6e2b0";
+    ctx.beginPath();
+    ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+    ctx.fill();
+    font(ctx, 11);
+    ctx.fillStyle = "#082033";
+    ctx.fillText("+", cx - 3, cy + 4);
+
+    const el = electronState();
+    if (el && el.alpha > 0) {
+      const rad = r1 * el.rUnit;
+      const ex = cx + Math.cos(state.angle) * rad;
+      const ey = cy + Math.sin(state.angle) * rad;
+      ctx.globalAlpha = clamp(el.alpha, 0, 1);
+      ctx.fillStyle = "#9fd0ff";
+      ctx.beginPath();
+      ctx.arc(ex, ey, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    const anim = state.anim;
+    if (anim && (anim.kind === "photon-in" || anim.kind === "photon-out" || anim.kind === "miss")) {
+      const tr = transition(anim.ni, anim.nf);
+      const ePh = anim.photonEnergy || tr.dE;
+      const lam = ePh > 0 ? HC / ePh : 500;
+      const col = wavelengthColor(lam);
+      const t = anim.t / anim.dur;
+      let x;
+      let y = cy - 36;
+      if (anim.kind === "photon-in") x = cx - 190 + t * 190;
+      else if (anim.kind === "photon-out") x = cx + t * 210;
+      else x = cx - 200 + t * 420;
+      ctx.fillStyle = cssColor(col, 0.95);
+      ctx.beginPath();
+      ctx.arc(x, y, 7, 0, Math.PI * 2);
+      ctx.fill();
+      font(ctx, 12, "700");
+      ctx.fillStyle = "#f4f7ff";
+      const label = anim.kind === "miss" ? "พลังงานไม่ตรง  " + ePh.toFixed(2) + " eV" : (isFinite(lam) ? lam.toFixed(0) + " nm" : "");
+      ctx.fillText(label, x + 10, y - 8);
+    }
+
+    const tr = transition(state.ni, state.nf);
+    font(ctx, 14, "700");
+    ctx.fillStyle = "#f3e7c8";
+    const kind = state.ni === state.nf ? "ไม่มีการเปลี่ยนระดับ" : tr.emit ? "ปล่อยโฟตอน" : (!isFinite(state.nf) ? "ไอออไนเซชัน" : "ดูดกลืนโฟตอน");
+    ctx.fillText(kind + " · " + seriesName(state.ni, state.nf), 16, h - 16);
+
+    if (show) drawEnergyDiagram(ctx, w - diagramW + 8, 28, diagramW - 16, h - 48, tr);
+    ctx.restore();
+  }
+
+  function drawEnergyDiagram(ctx, x, y, w, h, tr) {
+    ctx.fillStyle = "rgba(6,12,24,0.55)";
+    roundRect(ctx, x - 6, y - 8, w + 10, h + 16, 10);
+    ctx.fill();
+    const yE = (E) => y + h - ((E + 13.6) / 13.6) * h;
+    ctx.strokeStyle = "rgba(200,214,230,0.45)";
+    ctx.lineWidth = 1.4;
+    for (let n = 1; n <= 6; n++) {
+      const yy = yE(levelEnergy(n));
+      ctx.beginPath();
+      ctx.moveTo(x, yy);
+      ctx.lineTo(x + w * 0.62, yy);
+      ctx.stroke();
+      font(ctx, 11);
+      ctx.fillStyle = "#d5e2f5";
+      ctx.fillText("n=" + n + "  " + fixed(levelEnergy(n), 2), x + w * 0.64, yy + 4);
+    }
+    const y0 = yE(0);
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(x, y0);
+    ctx.lineTo(x + w * 0.62, y0);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillText("∞  0", x + w * 0.64, y0 + 4);
+    if (tr.dE > 1e-6) {
+      const y1 = yE(tr.Ei);
+      const y2 = yE(tr.Ef);
+      const col = wavelengthColor(tr.lam);
+      ctx.strokeStyle = col.hex;
+      ctx.fillStyle = col.hex;
+      ctx.lineWidth = 2;
+      const ax = x + w * 0.28;
+      drawArrow(ctx, ax, y1, ax, y2);
+      font(ctx, 11, "700");
+      ctx.fillText("ΔE", ax + 6, (y1 + y2) / 2);
+    }
+    font(ctx, 12, "700");
+    ctx.fillStyle = "#f3e7c8";
+    ctx.fillText("ระดับพลังงาน", x, y - 12);
+  }
+
+  function drawDeBroglie(ctx, w, h) {
+    drawLab(ctx, w, h);
+    const db = debroglieCalc();
+    const col = { r: 120, g: 230, b: 255 };
+    const gunX = w * 0.08;
+    const midY = h * 0.42;
+    const crystalX = w * 0.40;
+    const screenX = w * 0.72;
+    const screenR = Math.min(h * 0.30, w * 0.16);
+    ctx.save();
+    ctx.fillStyle = "#24384f";
+    roundRect(ctx, gunX - 30, midY - 22, 70, 44, 8);
+    ctx.fill();
+    font(ctx, 12);
+    ctx.fillStyle = "#e7eef8";
+    ctx.fillText("ปืน e⁻", gunX - 24, midY + 4);
+    ctx.fillText("V = " + Math.round(db.V) + " V", gunX - 24, midY + 48);
+
+    const waveLen = clamp((db.lam / 0.05) * 16, 3, 90);
+    ctx.strokeStyle = "#8ae8ff";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    for (let x = gunX + 48; x < crystalX - 16; x++) {
+      const y = midY + Math.sin((x / waveLen) * Math.PI * 2 + state.wavePhase) * 14;
+      if (x === gunX + 48) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    ctx.fillStyle = "#d7e4f2";
+    for (let i = -2; i <= 2; i++) {
+      for (let j = -2; j <= 2; j++) {
+        ctx.beginPath();
+        ctx.arc(crystalX + i * 10, midY + j * 10, 2.3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    font(ctx, 12);
+    ctx.fillStyle = "#d5e2f5";
+    ctx.fillText("ผลึกแกรไฟต์", crystalX - 28, midY + 46);
+
+    const g = ctx.createRadialGradient(screenX, midY, 10, screenX, midY, screenR);
+    g.addColorStop(0, "rgba(18,40,32,0.95)");
+    g.addColorStop(1, "rgba(8,16,18,0.95)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(screenX, midY, screenR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(160,220,190,0.4)";
+    ctx.stroke();
+
+    const rings = braggRings(db.lam);
+    const visible = rings.filter((r) => r.onScreen);
+    const maxTan = 0.7;
+    visible.forEach((r) => {
+      const rad = screenR * 0.9 * (Math.tan(r.phi) / maxTan);
+      ctx.strokeStyle = `rgba(130,255,190,${0.35 + 0.5 * state.ringPulse})`;
+      ctx.lineWidth = 2 + state.ringPulse * 2;
+      ctx.beginPath();
+      ctx.arc(screenX, midY, rad, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+    ctx.lineWidth = 1;
+    state.dbPts.forEach((p) => {
+      ctx.fillStyle = "#d8fbff";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    font(ctx, 13);
+    ctx.fillStyle = "#d9fff0";
+    ctx.fillText(visible.length ? "วงเลี้ยวเบน " + visible.length + " วงบนฉาก" : "วงอยู่นอกฉากด้านหน้า ลองเพิ่มศักย์เร่ง", 16, h - 36);
+    ctx.fillStyle = "#c5d6ea";
+    ctx.fillText("λ = " + db.lam.toFixed(4) + " nm   ภาพคลื่นปรับมาตราส่วนให้มองเห็นได้", 16, h - 16);
+    ctx.restore();
+  }
+
+  function drawCloud(ctx, w, h) {
+    drawLab(ctx, w, h);
+    const topH = h * 0.66;
+    const cx = w * 0.5;
+    const cy = topH * 0.52;
+    const a0 = Math.min(w, topH) * 0.055;
+    const rot = state.cloudRot;
+    const c = Math.cos(rot);
+    const s = Math.sin(rot);
+    const proj = state.proj;
+    proj.length = 0;
+    state.cloud.forEach((p) => {
+      const y = p.y * c - p.z * s;
+      const z = p.y * s + p.z * c;
+      proj.push({ x: p.x, y, z, lobe: p.z });
+    });
+    proj.sort((a, b) => a.y - b.y);
+    ctx.save();
+    const nOrbit = state.orbital === "1s" ? 1 : 2;
+    ctx.setLineDash([4, 5]);
+    ctx.strokeStyle = "rgba(255,214,140,0.85)";
+    ctx.beginPath();
+    ctx.arc(cx, cy, a0 * nOrbit * nOrbit, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    const palette = state.orbital === "2p"
+      ? (z) => (z >= 0 ? "120,190,255" : "255,150,120")
+      : () => (state.orbital === "2s" ? "255,206,120" : "110,235,215");
+    proj.forEach((p) => {
+      const alpha = 0.18 + 0.55 * ((p.y + 14) / 28);
+      ctx.fillStyle = `rgba(${palette(p.lobe)},${clamp(alpha, 0.08, 0.8)})`;
+      ctx.fillRect(cx + p.x * a0, cy - p.z * a0, 2.4, 2.4);
+    });
+    font(ctx, 13, "700");
+    ctx.fillStyle = "#f4e7c8";
+    ctx.fillText("ออร์บิทัล " + state.orbital, 16, 28);
+    font(ctx, 12);
+    ctx.fillStyle = "#c5d4e8";
+    ctx.fillText("เส้นประ = วงโบร์ n = " + nOrbit + " (แนวเทียบ ไม่ใช่รางโคจร)", 16, topH - 12);
+
+    const baseY = h * 0.86;
+    ctx.strokeStyle = "rgba(200,214,230,0.4)";
+    ctx.beginPath();
+    ctx.moveTo(30, baseY);
+    ctx.lineTo(w - 20, baseY);
+    ctx.stroke();
+    const tau = 0.35 + state.dxNm * 6;
+    const spread = state.dxNm * Math.sqrt(1 + (state.packetT / tau) ** 2);
+    const xOf = (nm) => 30 + ((nm + 1.2) / 2.4) * (w - 50);
+    ctx.beginPath();
+    ctx.fillStyle = "rgba(90,210,255,0.25)";
+    ctx.moveTo(xOf(-1.2), baseY);
+    for (let i = 0; i <= 80; i++) {
+      const nm = -1.2 + (2.4 * i) / 80;
+      const gaus = Math.exp(-(nm * nm) / (2 * spread * spread));
+      ctx.lineTo(xOf(nm), baseY - gaus * h * 0.12);
+    }
+    ctx.lineTo(xOf(1.2), baseY);
+    ctx.fill();
+    ctx.strokeStyle = "#8fdfff";
+    ctx.stroke();
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = "#ffd58a";
+    [state.dxNm, -state.dxNm].forEach((nm) => {
+      ctx.beginPath();
+      ctx.moveTo(xOf(nm), baseY);
+      ctx.lineTo(xOf(nm), baseY - h * 0.13);
+      ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    font(ctx, 12);
+    ctx.fillStyle = "#ffe1a8";
+    ctx.fillText("แพ็กเก็ตคลื่นเริ่มต้นกว้าง Δx = " + state.dxNm.toFixed(3) + " nm", 30, h * 0.70);
+    ctx.fillStyle = "#c5d4e8";
+    const msg = state.packetT > 0.05 ? "ยิ่ง Δx เริ่มต้นแคบ แพ็กเก็ตยิ่งกระจายเร็ว" : "กดเริ่มเพื่อดูการกระจายของแพ็กเก็ต";
+    ctx.fillText(msg, 30, h * 0.745);
+    ctx.restore();
+  }
+
+  function makePlot(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "#0b1424";
+    ctx.fillRect(0, 0, w, h);
+    const pad = { l: 44, r: 12, t: 12, b: 28 };
+    const pw = w - pad.l - pad.r;
+    const ph = h - pad.t - pad.b;
+    ctx.strokeStyle = "rgba(180,200,230,0.16)";
+    ctx.strokeRect(pad.l, pad.t, pw, ph);
+    ctx.beginPath();
+    ctx.strokeStyle = "rgba(180,200,230,0.08)";
+    for (let i = 1; i < 4; i++) {
+      const y = pad.t + (ph * i) / 4;
+      ctx.moveTo(pad.l, y);
+      ctx.lineTo(pad.l + pw, y);
+    }
+    ctx.stroke();
+    return { pad, pw, ph };
+  }
+  function axisLabels(ctx, w, h, plot, xLabel, yLabel) {
+    font(ctx, 11);
+    ctx.fillStyle = "#a9bad2";
+    ctx.fillText(xLabel, plot.pad.l, h - 8);
+    ctx.fillText(yLabel, 6, 12);
+  }
+
+  function drawGraphs() {
+    const A = fitCanvas(graphA);
+    const B = fitCanvas(graphB);
+    if (!A || !B) return;
+    if (state.mode === 1) { graphRutherford(A); graphThetaB(B); }
+    else if (state.mode === 2) { graphIV(A); graphEkF(B); }
+    else if (state.mode === 3) { graphLevels(A); graphSpectrum(B); }
+    else if (state.mode === 4) { graphLambdaV(A); graphRings(B); }
+    else { graphGaussian(A, true); graphGaussian(B, false); }
+  }
+
+  function graphRutherford(view) {
+    const { ctx, w, h } = view;
+    const plot = makePlot(ctx, w, h);
+    axisLabels(ctx, w, h, plot, "มุมกระเจิง θ (องศา)", "จำนวน");
+    const max = Math.max(5, ...state.hist);
+    state.hist.forEach((count, i) => {
+      const x = plot.pad.l + (i / 18) * plot.pw;
+      const bw = plot.pw / 18 - 2;
+      const bh = (count / max) * (plot.ph - 4);
+      const deg = i * 10;
+      ctx.fillStyle = deg >= 90 ? "#ff8d7a" : deg >= 30 ? "#ffd36a" : "#3ee0c5";
+      ctx.fillRect(x + 1, plot.pad.t + plot.ph - bh, bw, bh);
+    });
+    font(ctx, 10);
+    ctx.fillStyle = "#9aadc8";
+    ctx.fillText("0°", plot.pad.l, h - 16);
+    ctx.fillText("90°", plot.pad.l + plot.pw * 0.5 - 8, h - 16);
+    ctx.fillText("180°", plot.pad.l + plot.pw - 28, h - 16);
+  }
+
+  function graphThetaB(view) {
+    const { ctx, w, h } = view;
+    const plot = makePlot(ctx, w, h);
+    axisLabels(ctx, w, h, plot, "ระยะกระทบ b (fm)", "θ (องศา)");
+    const D = closestApproach(state.Z, state.energy);
+    const bMax = 400;
+    ctx.beginPath();
+    ctx.strokeStyle = "#e7c78a";
+    ctx.lineWidth = 2;
+    for (let i = 0; i <= 80; i++) {
+      const b = Math.max(0.2, (bMax * i) / 80);
+      const th = (scatterAngle(b, D) * 180) / Math.PI;
+      const x = plot.pad.l + (b / bMax) * plot.pw;
+      const y = plot.pad.t + plot.ph - (th / 180) * plot.ph;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    if (state.last) {
+      const x = plot.pad.l + (clamp(Math.abs(state.last.b), 0, bMax) / bMax) * plot.pw;
+      const y = plot.pad.t + plot.ph - (state.last.deg / 180) * plot.ph;
+      ctx.fillStyle = "#ff8d7a";
+      ctx.beginPath();
+      ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    font(ctx, 11);
+    ctx.fillStyle = "#c5d4e8";
+    ctx.fillText("เส้นคือสูตร θ = 2 arctan(d₀ / 2b)", plot.pad.l + 6, plot.pad.t + 14);
+  }
+
+  function graphIV(view) {
+    const { ctx, w, h } = view;
+    const plot = makePlot(ctx, w, h);
+    const ph = photoCalc();
+    const xmin = -Math.max(5, ph.Vs * 1.15, 0.5);
+    const xmax = 5;
+    axisLabels(ctx, w, h, plot, "V (โวลต์)  เส้นประ = ขอบสไลเดอร์ −5 V", "I (µA)");
+    const Isat = 5 * (state.intensity / 100);
+    const ymax = Math.max(0.5, Isat * 1.15);
+    const X = (V) => plot.pad.l + ((V - xmin) / (xmax - xmin)) * plot.pw;
+    const Y = (I) => plot.pad.t + plot.ph - (I / ymax) * plot.ph;
+    ctx.beginPath();
+    ctx.strokeStyle = "#3ee0c5";
+    ctx.lineWidth = 2;
+    for (let i = 0; i <= 120; i++) {
+      const V = xmin + ((xmax - xmin) * i) / 120;
+      const I = photoCurrent(V, state.intensity, ph.Vs, ph.active);
+      const x = X(V);
+      const y = Y(I);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+    ctx.beginPath();
+    ctx.moveTo(X(-5), plot.pad.t);
+    ctx.lineTo(X(-5), plot.pad.t + plot.ph);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    if (ph.active && ph.Vs > 0) {
+      ctx.fillStyle = "#ffd36a";
+      ctx.beginPath();
+      ctx.arc(X(-ph.Vs), Y(0), 4, 0, Math.PI * 2);
+      ctx.fill();
+      font(ctx, 11);
+      ctx.fillText("−Vs", X(-ph.Vs) + 4, Y(0) - 6);
+    }
+    ctx.fillStyle = "#ff8d7a";
+    ctx.beginPath();
+    ctx.arc(X(state.voltage), Y(ph.I), 4.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function graphEkF(view) {
+    const { ctx, w, h } = view;
+    const plot = makePlot(ctx, w, h);
+    axisLabels(ctx, w, h, plot, "f (×10¹⁴ Hz)", "Ek,max (eV)");
+    const fMax = (HC / 100) / H_EV;
+    const xOf = (f) => plot.pad.l + (f / fMax) * plot.pw;
+    const yOf = (e) => plot.pad.t + plot.ph - (e / 14) * plot.ph;
+    const lines = [
+      { W: 2.28, color: "rgba(255,211,106,0.35)" },
+      { W: 4.3, color: "rgba(140,180,220,0.35)" },
+      { W: 6.35, color: "rgba(220,220,230,0.35)" }
+    ];
+    lines.forEach((ln) => {
+      const f0 = ln.W / H_EV;
+      ctx.strokeStyle = ln.color;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(xOf(f0), yOf(0));
+      ctx.lineTo(xOf(fMax), yOf(Math.max(0, (fMax - f0) * H_EV)));
+      ctx.stroke();
+    });
+    const f0 = state.W / H_EV;
+    ctx.strokeStyle = "#3ee0c5";
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.moveTo(xOf(Math.max(0, f0)), yOf(0));
+    ctx.lineTo(xOf(fMax), yOf(Math.max(0, (fMax - f0) * H_EV)));
+    ctx.stroke();
+    const ph = photoCalc();
+    ctx.fillStyle = ph.active ? "#ff8d7a" : "#ffd36a";
+    ctx.beginPath();
+    ctx.arc(xOf(ph.f), yOf(ph.Ek), 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    font(ctx, 11);
+    ctx.fillStyle = "#c5d4e8";
+    ctx.fillText("ความชัน = h   เส้นไม่เลื่อนเมื่อปรับความเข้ม", plot.pad.l + 4, plot.pad.t + 14);
+  }
+
+  function graphLevels(view) {
+    const { ctx, w, h } = view;
+    const plot = makePlot(ctx, w, h);
+    axisLabels(ctx, w, h, plot, "n", "En (eV)");
+    const yOf = (E) => plot.pad.t + plot.ph - ((E + 13.6) / 13.6) * plot.ph;
+    for (let n = 1; n <= 6; n++) {
+      const x = plot.pad.l + (n / 7) * plot.pw;
+      const y = yOf(levelEnergy(n));
+      ctx.strokeStyle = n === state.ni || n === state.nf ? "#ffd36a" : "rgba(180,200,220,0.7)";
+      ctx.beginPath();
+      ctx.moveTo(x - 16, y);
+      ctx.lineTo(x + 16, y);
+      ctx.stroke();
+      font(ctx, 11);
+      ctx.fillStyle = "#d5e2f5";
+      ctx.fillText(String(n), x - 3, plot.pad.t + plot.ph + 14);
+    }
+    const tr = transition(state.ni, state.nf);
+    if (tr.dE > 0 && isFinite(state.ni) && isFinite(state.nf)) {
+      const x = plot.pad.l + (((state.ni + state.nf) / 2) / 7) * plot.pw;
+      ctx.strokeStyle = wavelengthColor(tr.lam).hex;
+      ctx.lineWidth = 2;
+      drawArrow(ctx, x, yOf(tr.Ei), x, yOf(tr.Ef));
+      ctx.lineWidth = 1;
+    }
+  }
+
+  function graphSpectrum(view) {
+    const { ctx, w, h } = view;
+    const plot = makePlot(ctx, w, h);
+    axisLabels(ctx, w, h, plot, "ความยาวคลื่น (nm, สเกลลอก)", "สเปกตรัม");
+    const lo = 70;
+    const hi = 8000;
+    const xOf = (lam) => plot.pad.l + ((Math.log10(lam) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo))) * plot.pw;
+    const visL = xOf(380);
+    const visR = xOf(750);
+    const grd = ctx.createLinearGradient(visL, 0, visR, 0);
+    grd.addColorStop(0, "#6a4cff");
+    grd.addColorStop(0.25, "#3050ff");
+    grd.addColorStop(0.45, "#20d070");
+    grd.addColorStop(0.7, "#ffe14a");
+    grd.addColorStop(1, "#ff2a3c");
+    ctx.fillStyle = grd;
+    ctx.globalAlpha = 0.35;
+    ctx.fillRect(visL, plot.pad.t + plot.ph * 0.55, visR - visL, plot.ph * 0.35);
+    ctx.globalAlpha = 1;
+    const low = Math.min(isFinite(state.nf) ? state.nf : 1, isFinite(state.ni) ? state.ni : 1);
+    const base = clamp(low, 1, 5);
+    const tr = transition(state.ni, state.nf);
+    for (let n = base + 1; n <= 8; n++) {
+      const line = transition(n, base);
+      const x = xOf(line.lam);
+      ctx.strokeStyle = wavelengthColor(line.lam).hex;
+      ctx.lineWidth = Math.abs(line.lam - tr.lam) < 1 ? 4 : 2.4;
+      ctx.beginPath();
+      ctx.moveTo(x, plot.pad.t + 8);
+      ctx.lineTo(x, plot.pad.t + plot.ph * 0.48);
+      ctx.stroke();
+    }
+    const limit = transition(Infinity, base);
+    if (isFinite(limit.lam)) {
+      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = "#ffffff";
+      ctx.beginPath();
+      const x = xOf(limit.lam);
+      ctx.moveTo(x, plot.pad.t + 8);
+      ctx.lineTo(x, plot.pad.t + plot.ph * 0.48);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    if (isFinite(tr.lam)) {
+      const x = xOf(clamp(tr.lam, lo, hi));
+      ctx.fillStyle = "#ffe1a3";
+      font(ctx, 11);
+      ctx.fillText(tr.lam.toFixed(0) + " nm", x + 4, plot.pad.t + plot.ph * 0.42);
+    }
+    font(ctx, 11);
+    ctx.fillStyle = "#c5d4e8";
+    ctx.fillText(SERIES[base] + "  แถบสีคือช่วงที่ตามองเห็น", plot.pad.l + 4, plot.pad.t + plot.ph - 6);
+  }
+
+  function graphLambdaV(view) {
+    const { ctx, w, h } = view;
+    const plot = makePlot(ctx, w, h);
+    axisLabels(ctx, w, h, plot, "V (โวลต์, สเกลลอก)", "λ (nm)");
+    const xOf = (V) => plot.pad.l + ((Math.log10(V) - 1) / 3) * plot.pw;
+    const yOf = (lam) => plot.pad.t + plot.ph - (lam / 0.45) * plot.ph;
+    ctx.beginPath();
+    ctx.strokeStyle = "#3ee0c5";
+    ctx.lineWidth = 2;
+    for (let i = 0; i <= 80; i++) {
+      const V = 10 * 1000 ** (i / 80);
+      const x = xOf(V);
+      const y = yOf(1.228 / Math.sqrt(V));
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    const db = debroglieCalc();
+    ctx.fillStyle = "#ffd36a";
+    ctx.beginPath();
+    ctx.arc(xOf(db.V), yOf(db.lam), 4.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function graphRings(view) {
+    const { ctx, w, h } = view;
+    const plot = makePlot(ctx, w, h);
+    axisLabels(ctx, w, h, plot, "อันดับ n", "มุมเบี่ยง 2θ (องศา)");
+    const db = debroglieCalc();
+    const rings = braggRings(db.lam);
+    rings.forEach((r) => {
+      const x = plot.pad.l + (r.n / 8) * plot.pw;
+      const deg = (r.phi * 180) / Math.PI;
+      const bh = (Math.min(deg, 80) / 80) * (plot.ph - 8);
+      ctx.fillStyle = r.onScreen ? "#7dffe1" : "rgba(255,141,122,0.7)";
+      ctx.fillRect(x, plot.pad.t + plot.ph - bh, 18, bh);
+      font(ctx, 11);
+      ctx.fillStyle = "#d5e2f5";
+      ctx.fillText(String(r.n), x + 4, plot.pad.t + plot.ph + 14);
+    });
+    if (!rings.length) {
+      font(ctx, 12);
+      ctx.fillStyle = "#ffc1b6";
+      ctx.fillText("ยังไม่มีอันดับที่ตกบนฉาก", plot.pad.l + 8, plot.pad.t + 24);
+    }
+  }
+
+  function graphGaussian(view, position) {
+    const { ctx, w, h } = view;
+    const plot = makePlot(ctx, w, h);
+    const u = uncCalc();
+    let sigma;
+    let xMin;
+    let xMax;
+    let label;
+    if (position) {
+      sigma = state.dxNm;
+      xMin = -1.2;
+      xMax = 1.2;
+      label = "x (nm)   เส้นประ = ±Δx";
+    } else {
+      const dpMax = 6.626e-34 / (4 * Math.PI * 0.008e-9);
+      sigma = u.dp / dpMax;
+      xMin = -1.3;
+      xMax = 1.3;
+      label = "p (เทียบกับ Δp ที่ Δx = 0.008 nm)";
+    }
+    axisLabels(ctx, w, h, plot, label, "ความน่าจะเป็น");
+    const xOf = (x) => plot.pad.l + ((x - xMin) / (xMax - xMin)) * plot.pw;
+    ctx.beginPath();
+    ctx.strokeStyle = position ? "#3ee0c5" : "#ffd36a";
+    ctx.lineWidth = 2;
+    for (let i = 0; i <= 90; i++) {
+      const x = xMin + ((xMax - xMin) * i) / 90;
+      const y = Math.exp(-(x * x) / (2 * sigma * sigma));
+      const px = xOf(x);
+      const py = plot.pad.t + plot.ph - y * (plot.ph - 8);
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    if (position) {
+      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = "#ffe1a8";
+      [state.dxNm, -state.dxNm].forEach((x) => {
+        ctx.beginPath();
+        ctx.moveTo(xOf(x), plot.pad.t);
+        ctx.lineTo(xOf(x), plot.pad.t + plot.ph);
+        ctx.stroke();
+      });
+      ctx.setLineDash([]);
+    }
+  }
+
+  function nLabel(n) { return isFinite(n) ? String(n) : "∞"; }
+
+  function updateReadouts() {
+    const titles = {
+      1: ["ฮิสโทแกรมมุมกระเจิง", "ความสัมพันธ์ θ กับ b"],
+      2: ["กราฟ I–V", "กราฟ Ek,max กับความถี่"],
+      3: ["ระดับพลังงานของไฮโดรเจน", "เส้นสเปกตรัมของอนุกรม"],
+      4: ["ความยาวคลื่นเดอบรอยล์กับศักย์เร่ง", "มุมเลี้ยวเบนแต่ละอันดับ"],
+      5: ["การกระจายตำแหน่ง กว้าง Δx", "การกระจายโมเมนตัม กว้าง Δp"]
+    };
+    $("gTitleA").textContent = titles[state.mode][0];
+    $("gTitleB").textContent = titles[state.mode][1];
+    const hud = {
+      1: "การกระเจิงของรัทเทอร์ฟอร์ด",
+      2: "ปรากฏการณ์โฟโตอิเล็กทริก",
+      3: "อะตอมของโบร์และสเปกตรัมไฮโดรเจน",
+      4: "คลื่นเดอบรอยล์ของอิเล็กตรอน",
+      5: "หลักความไม่แน่นอนและกลุ่มหมอก"
+    };
+    $("hudTitle").textContent = hud[state.mode];
+    $("playBtn").classList.toggle("active", state.run === "play");
+    $("pauseBtn").classList.toggle("active", state.run !== "play");
+
+    if (state.mode === 1) {
+      const D = closestApproach(state.Z, state.energy);
+      const R = nuclearRadius(state.Z);
+      const metal = METALS[state.Z];
+      $("countAll").textContent = String(state.total);
+      $("countBack").textContent = String(state.back);
+      const last = state.last ? `b = ${state.last.b.toFixed(0)} fm → θ = ${state.last.deg.toFixed(0)}°` : "ยังไม่มียิงสด";
+      $("cards1").innerHTML = `<div class="eq">d₀ = (1.44 MeV·fm) × 2 × ${state.Z} / ${state.energy.toFixed(1)} MeV<br>= ${D.toFixed(1)} fm = ${sci(D * 1e-15)} m<br>รัศมีนิวเคลียส ${metal.symbol} ≈ ${R.toFixed(1)} fm<br>d₀ / R ≈ ${(D / R).toFixed(1)}</div><p>${last}</p><p>เบี่ยงมากกว่า 20° : ${state.wide} อนุภาค จาก ${state.total}</p><p>วงประรอบนิวเคลียสคือระยะเข้าใกล้สุดเมื่อชนตรง d₀ ยิ่งพลังงานสูงหรือ Z ต่ำ วงนี้ยิ่งเล็ก</p>`;
+      $("hudStatus").textContent = state.run === "play" ? "กำลังยิงลำอนุภาค" : "หยุดอยู่";
+      $("caption").textContent = "อนุภาคที่ผ่านไกลจากนิวเคลียสแทบไม่เบี่ยง อนุภาคที่เข้าใกล้ถูกแรงคูลอมบ์ผลักให้เบี่ยงมาก บางครั้งสะท้อนกลับ";
+      $("legend").textContent = "สีเขียวอมฟ้า θ < 30° · สีทอง 30°–90° · สีแดง θ > 90° · เส้นจางคือแนวโคจรตัวอย่าง ไม่ถูกนับในฮิสโทแกรม";
+    } else if (state.mode === 2) {
+      const ph = photoCalc();
+      $("ammeter").textContent = ph.I.toFixed(2) + " µA";
+      $("voltmeter").textContent = state.voltage.toFixed(2) + " V";
+      $("ammeterBox").classList.toggle("hot", ph.I > 0.02);
+      const eq = ph.active
+        ? `hf = ${ph.E.toFixed(2)} eV<br>W = ${ph.W.toFixed(2)} eV<br>Ek,max = hf − W = ${ph.Ek.toFixed(2)} eV<br>Vs = ${ph.Vs.toFixed(2)} V<br>f = ${sci(ph.f)} Hz<br>f₀ = ${sci(ph.f0)} Hz · λ₀ = ${ph.lam0.toFixed(1)} nm`
+        : `hf = ${ph.E.toFixed(2)} eV &lt; W = ${ph.W.toFixed(2)} eV<br>Ek,max = 0 · Vs = 0<br>f₀ = ${sci(ph.f0)} Hz · λ₀ = ${ph.lam0.toFixed(1)} nm`;
+      $("cards2").innerHTML = `<div class="eq">${eq}</div><p>พลังงานโฟตอน = ${sci(ph.EJ)} J · พลังงานจลน์สูงสุด = ${sci(ph.EkJ)} J</p><p>กระแสอิ่มตัวในแบบจำลองนี้คือ ${(5 * state.intensity / 100).toFixed(2)} µA เมื่อ V ≥ 0 และเกิดโฟโตอิเล็กตรอน</p><p>กราฟ I–V เป็นแบบจำลองระดับมัธยม: กระแสเป็นศูนย์เมื่อ V ≤ −Vs และอิ่มตัวเมื่อ V ≥ 0</p>`;
+      $("rainbowMark").style.left = ((state.lambda - 100) / 700 * 100) + "%";
+      const band = wavelengthColor(state.lambda).band;
+      $("hudStatus").textContent = !ph.active ? "ต่ำกว่าขีดเริ่ม" : (state.voltage <= -ph.Vs ? "กระแสเป็นศูนย์" : ph.I.toFixed(2) + " µA");
+      $("caption").textContent = ph.active
+        ? `โฟตอนสีตาม λ = ${state.lambda} nm (${band}) พลังงาน ${ph.E.toFixed(2)} eV ทำให้อิเล็กตรอนหลุดด้วย Ek,max = ${ph.Ek.toFixed(2)} eV`
+        : `แสงนี้เป็น${band} แต่ hf ยังไม่ถึงฟังก์ชันงาน อิเล็กตรอนจึงไม่หลุด แม้เพิ่มความเข้มแสง`;
+      $("legend").textContent = "ความเข้มเปลี่ยนจำนวนอิเล็กตรอน · ความถี่เปลี่ยนพลังงานของอิเล็กตรอนแต่ละตัว · ศักย์ลบคือศักย์ย้อนกลับ";
+    } else if (state.mode === 3) {
+      const tr = transition(state.ni, state.nf);
+      const rn = isFinite(state.ni) ? state.ni * state.ni * 0.053 : NaN;
+      const rf = isFinite(state.nf) ? state.nf * state.nf * 0.053 : NaN;
+      $("meterDE").textContent = tr.dE > 0 ? tr.dE.toFixed(2) + " eV" : "0";
+      $("meterLam").textContent = isFinite(tr.lam) ? tr.lam.toFixed(1) + " nm" : "—";
+      const col = isFinite(tr.lam) ? wavelengthColor(tr.lam) : null;
+      $("cards3").innerHTML = `<div class="eq">E_${nLabel(state.ni)} = ${fixed(tr.Ei, 2)} eV<br>E_${nLabel(state.nf)} = ${fixed(tr.Ef, 2)} eV<br>ΔE = ${tr.dE.toFixed(2)} eV = hf<br>λ = hc/ΔE = ${isFinite(tr.lam) ? tr.lam.toFixed(1) : "—"} nm<br>จากไรด์เบิร์ก λ = ${isFinite(tr.lamR) ? tr.lamR.toFixed(1) : "—"} nm<br>r_${nLabel(state.ni)} = ${isFinite(rn) ? rn.toFixed(3) : "—"} nm</div><p>${seriesName(state.ni, state.nf)}${col ? " · " + col.band : ""}</p><p>r_f = ${isFinite(rf) ? rf.toFixed(3) + " nm" : "—"} · L = n h/2π เมื่อ n = ${nLabel(state.ni)} ได้ ${isFinite(state.ni) ? sci(state.ni * 1.055e-34) + " J·s" : "—"}</p><p>ค่า λ จากพลังงานกับจากสมการไรด์เบิร์กต่างกันเล็กน้อย เพราะ 13.6 eV, hc และ R_H ในแบบเรียนถูกปัดเศษ</p>`;
+      $("hudStatus").textContent = state.ni === state.nf ? "ΔE = 0" : (tr.emit ? "ปล่อยโฟตอน" : "ดูดกลืนโฟตอน");
+      $("caption").textContent = "อิเล็กตรอนอยู่ได้เฉพาะชั้น n = 1, 2, 3, … วงในภาพเป็นสัดส่วน r ∝ n² จริง จึงเห็นชั้นในเล็กและชั้นนอกห่างมาก";
+      $("legend").textContent = "ลูกกลมฟ้าคืออิเล็กตรอน · จุดสว่างสีตรงตามความยาวคลื่นคือโฟตอน · เส้นประในกราฟสเปกตรัมคือขอบอนุกรม";
+    } else if (state.mode === 4) {
+      const db = debroglieCalc();
+      const rings = braggRings(db.lam);
+      $("meterDb").textContent = db.lam.toFixed(4) + " nm";
+      $("meterSpeed").textContent = sci(db.v) + " m/s";
+      $("cards4").innerHTML = `<div class="eq">λ = 1.228 / √${Math.round(db.V)} = ${db.lam.toFixed(4)} nm<br>= ${sci(db.lam * 1e-9)} m<br>v = ${sci(db.v)} m/s<br>p = mv = ${sci(db.p)} kg·m/s<br>h/p = ${db.lamH.toFixed(4)} nm</div><p>ผลึกแกรไฟต์ในแบบจำลองใช้ d = 0.213 nm และกฎของแบรกก์ nλ = 2d sinθ เพื่อวางวงบนฉาก</p><p>วงที่ตกบนฉากด้านหน้า ${rings.filter((r) => r.onScreen).length} วง จาก ${rings.length} อันดับที่คำนวณได้</p><p>${db.V >= 3000 ? "ที่ศักย์สูงมาก ความเร็วจริงต่ำกว่าสูตรไม่สัมพัทธภาพเล็กน้อย แบบเรียน ม.6 ใช้สูตรนี้" : "ช่วงศักย์นี้สูตรไม่สัมพัทธภาพของแบบเรียนใช้ได้ดี"}</p>`;
+      $("hudStatus").textContent = "λ = " + db.lam.toFixed(4) + " nm";
+      $("caption").textContent = "อิเล็กตรอนที่ถูกเร่งมีโมเมนตัมสูงขึ้น ความยาวคลื่นของตัวอิเล็กตรอนจึงสั้นลง วงเลี้ยวเบนบนฉากเลยเล็กลง";
+      $("legend").textContent = "คลื่นสีฟ้าคือภาพความยาวคลื่นเดอบรอยล์ที่ขยายให้มองเห็น ไม่ใช่แสงที่อิเล็กตรอนปล่อยออกมา";
+    } else {
+      const u = uncCalc();
+      $("meterDx").textContent = state.dxNm.toFixed(3) + " nm";
+      $("meterDp").textContent = sci(u.dp);
+      const orbText = state.orbital === "1s"
+        ? "1s เป็นกลุ่มหมอกทรงกลม ความน่าจะเป็นหนาแน่นใกล้บริเวณนิวเคลียสมากกว่าด้านนอก"
+        : state.orbital === "2s"
+          ? "2s มีผิวโหนดคั่นระหว่างแกนในกับเปลือกนอก จึงไม่ใช่ก้อนทึบก้อนเดียว"
+          : "2p เป็นสองพูตามแกนดิ่ง มีระนาบโหนดตรงกลาง ความน่าจะเป็นเป็นศูนย์บนระนาบนั้น";
+      $("cards5").innerHTML = `<div class="eq">Δx = ${state.dxNm.toFixed(3)} nm = ${sci(u.dx)} m<br>Δp ≥ h/(4πΔx) = ${sci(u.dp)} kg·m/s<br>Δv ≥ Δp/m = ${sci(u.dv)} m/s<br>Δx·Δp = ${sci(u.product)} J·s<br>ℏ/2 = h/4π = ${sci(u.limit)} J·s</div><p>${orbText}</p><p>แบบจำลองนี้ใช้ค่าต่ำสุดของหลักความไม่แน่นอน พอดีกับขอบ ℏ/2</p><p>${Math.abs(state.dxNm - 0.053) < 0.008 ? "ที่ความกว้างประมาณรัศมีโบร์ Δv มีค่าใกล้เคียงอัตราเร็วในแบบโบร์ จึงระบุทั้งตำแหน่งบนวงและโมเมนตัมพร้อมกันไม่ได้" : "ลองเลื่อน Δx ไปใกล้ 0.053 nm เพื่อเทียบกับรัศมีโบร์"}</p>`;
+      $("hudStatus").textContent = "Δx Δp = ℏ/2";
+      $("caption").textContent = "กลุ่มหมอกด้านบนคือความน่าจะเป็นที่จะพบอิเล็กตรอน แพ็กเก็ตด้านล่างแสดงว่าถ้าเริ่มจับตำแหน่งให้แคบ มันจะกระจายเร็วเพราะโมเมนตัมกำกวม";
+      $("legend").textContent = "กราฟสองใบใช้แกนคงที่: เมื่อ Δx แคบลง กราฟตำแหน่งจะบางและกราฟโมเมนตัมจะกว้าง";
+    }
+    updateMis();
+  }
+
+  function updateMis() {
+    const box = $("misBox");
+    let warn = false;
+    let title = "ข้อควรสังเกต";
+    let text = "";
+    if (state.mode === 1) {
+      text = "แบบจำลองทอมสันคาดว่าอนุภาคแอลฟาทุกตัวจะเบี่ยงเพียงเล็กน้อย เพราะคิดว่าประจุบวกกระจายทั่วอะตอม ผลการทดลองไม่เป็นอย่างนั้น ส่วนใหญ่พุ่งเกือบตรง และมีบางส่วนเบี่ยงมุมมากหรือสะท้อนกลับ แสดงว่าประจุบวกและมวลรวมอยู่ที่นิวเคลียสขนาดเล็กมาก";
+      if (state.hint === "energy") {
+        warn = true;
+        title = "จุดที่มักเข้าใจคลาดเคลื่อน";
+        text = "การเพิ่มพลังงานของอนุภาคแอลฟาไม่ได้ทำให้นิวเคลียสใหญ่ขึ้น มันทำให้ระยะเข้าใกล้สุด d₀ สั้นลง อนุภาคจึงเลี้ยวได้น้อยลง มุมกระเจิงขึ้นกับระยะกระทบและแรงคูลอมบ์";
+      }
+    } else if (state.mode === 2) {
+      const ph = photoCalc();
+      if (!ph.active) {
+        warn = true;
+        title = "จุดที่มักเข้าใจคลาดเคลื่อน";
+        text = "โฟตอนแต่ละก้อนมีพลังงาน " + ph.E.toFixed(2) + " eV ซึ่งน้อยกว่าฟังก์ชันงาน " + ph.W.toFixed(2) + " eV อิเล็กตรอนจึงไม่หลุด แม้เลื่อนความเข้มจนสว่างมากก็ยังไม่มีกระแส เพราะความเข้มเพิ่มจำนวนโฟตอน ไม่ได้เพิ่มพลังงานต่อโฟตอน";
+      } else if (state.hint === "intensity") {
+        warn = true;
+        title = "จุดที่มักเข้าใจคลาดเคลื่อน";
+        text = "คุณเพิ่งปรับความเข้มแสง จำนวนโฟตอนต่อวินาทีเปลี่ยน กระแสจึงเปลี่ยน แต่ Ek,max ยังเป็น " + ph.Ek.toFixed(2) + " eV เท่าเดิม เพราะความถี่ไม่เปลี่ยน ความเข้มไม่ใช่ตัวกำหนดพลังงานจลน์สูงสุด";
+      } else if (state.voltage <= -ph.Vs) {
+        warn = true;
+        title = "จุดที่มักเข้าใจคลาดเคลื่อน";
+        text = "อิเล็กตรอนหลุดออกจากผิวได้ แต่ศักย์ย้อนกลับดึงมันกลับจนครบทุกตัวเมื่อ e|V| ≥ Ek,max จุดที่กระแสเพิ่งเป็นศูนย์คือความต่างศักย์หยุดยั้ง Vs = " + ph.Vs.toFixed(2) + " V ไม่ใช่ว่าแสงหยุดทำให้อิเล็กตรอนหลุด";
+      } else if (state.hint === "lambda" || state.hint === "metal") {
+        text = "ความถี่หรือชนิดโลหะเปลี่ยน ทำให้ hf หรือ W เปลี่ยน Ek,max และ Vs จึงเลื่อนตาม กราฟ Ek กับ f มีความชันเท่ากับ h และตัดแกนความถี่ที่ f₀ = W/h";
+      } else {
+        text = "แสงประพฤติตัวเป็นก้อนพลังงาน เรียกว่าโฟตอน หนึ่งโฟตอนปลดปล่อยอิเล็กตรอนได้หนึ่งตัว ส่วนพลังงานที่เหลือเป็นพลังงานจลน์ ตามสมการ hf = W + Ek,max";
+      }
+    } else if (state.mode === 3) {
+      if (state.hint === "wrong") {
+        warn = true;
+        title = "จุดที่มักเข้าใจคลาดเคลื่อน";
+        text = "โฟตอนจะถูกดูดกลืนก็ต่อเมื่อพลังงานเท่ากับผลต่างของระดับพลังงานพอดี โฟตอนที่พลังงานไม่ตรงจะทะลุไป อิเล็กตรอนไม่กระโดดชั้น ข้อยกเว้นคือโฟตอนพลังงานสูงพอจะทำไอออไนเซชัน";
+      } else if (state.ni === state.nf) {
+        warn = true;
+        title = "จุดที่มักเข้าใจคลาดเคลื่อน";
+        text = "ระดับต้นและระดับปลายเป็นชั้นเดียวกัน ΔE = 0 ไม่มีโฟตอนถูกปล่อยหรือดูดกลืน และอิเล็กตรอนก็ไม่ลอยอยู่ระหว่างชั้นได้";
+      } else {
+        text = "อิเล็กตรอนอยู่ในได้เฉพาะระดับพลังงานที่กำหนด ไม่ได้โคจรค้างระหว่างชั้น พลังงานเป็นลบเพราะยึดสถานะอิสระที่ไกลอนันต์เป็นศูนย์ ชั้นในผูกแน่นกว่าจึงติดลบมากกว่า";
+      }
+    } else if (state.mode === 4) {
+      warn = state.hint === "vacc";
+      title = warn ? "จุดที่มักเข้าใจคลาดเคลื่อน" : "ข้อควรสังเกต";
+      text = "ความยาวคลื่นเดอบรอยล์เป็นสมบัติคลื่นของตัวอนุภาค ไม่ใช่คลื่นแม่เหล็กไฟฟ้าที่วัตถุแผ่ออกมาระหว่างเคลื่อนที่ ลูกเบสบอลมวล 0.15 kg เร็ว 30 m/s มี λ ประมาณ 1.5×10⁻³⁴ m เล็กเกินกว่าจะเห็นการเลี้ยวเบน แต่อิเล็กตรอนในภาพนี้มี λ ระดับพิโกเมตรถึงอังสตรอม จึงเลี้ยวเบนผ่านผลึกได้";
+    } else {
+      const tight = state.dxNm < 0.03;
+      warn = tight || state.hint === "dx";
+      title = warn ? "จุดที่มักเข้าใจคลาดเคลื่อน" : "ข้อควรสังเกต";
+      text = tight
+        ? "การบีบ Δx ให้แคบมากไม่ได้ทำให้อิเล็กตรอนนิ่งสนิทที่จุดนั้น โมเมนตัมยิ่งกำกวม และแพ็กเก็ตจะกระจายเร็ว อิเล็กตรอนในอะตอมจึงถูกบรรยายเป็นกลุ่มหมอกความน่าจะเป็น ไม่ใช่ก้อนกลมบนราง"
+        : "หลักความไม่แน่นอน Δx Δp ≥ ℏ/2 บอกว่าตำแหน่งกับโมเมนตัมตามแกนเดียวกันบอกพร้อมกันได้ละเอียดจำกัด แบบจำลองกลุ่มหมอกคือภาพความน่าจะเป็นที่จะพบอิเล็กตรอน ไม่ใช่ภาพถ่ายของก้อนประจุที่กำลังวิ่งเป็นวง";
+    }
+    box.classList.toggle("warn", warn);
+    $("misTitle").textContent = title;
+    $("misText").textContent = text;
+  }
+
+  function spawnPhotonBurst(step) {
+    if (state.intensity <= 0) {
+      state.hint = "intensity";
+      return false;
+    }
+    const L = photoLayout(sim.getBoundingClientRect().width, sim.getBoundingClientRect().height);
+    const n = step ? Math.max(1, Math.round(state.intensity / 18)) : 1;
+    const ph = photoCalc();
+    for (let i = 0; i < n; i++) {
+      state.photons.push({
+        x: sim.getBoundingClientRect().width * 0.1,
+        y: L.top + 30 + Math.random() * (L.bot - L.top - 60),
+        step
+      });
+    }
+    return true;
+  }
+
+  function startBohr(forceWrong) {
+    const ni = state.ni;
+    const nf = state.nf;
+    const tr = transition(ni, nf);
+    if (forceWrong) {
+      let photonEnergy = 2.25;
+      if (Math.abs(tr.dE - photonEnergy) < 0.08) photonEnergy = 4.2;
+      state.anim = { kind: "miss", t: 0, dur: 1.7, ni, nf, photonEnergy };
+      state.hint = "wrong";
+      return true;
+    }
+    if (ni === nf) {
+      state.hint = "same";
+      state.anim = null;
+      return false;
+    }
+    state.hint = "bohr";
+    if (!isFinite(ni) && isFinite(nf)) {
+      state.anim = { kind: "capture", t: 0, dur: 1.15, ni, nf };
+      return true;
+    }
+    if (tr.emit) state.anim = { kind: "jump-emit", t: 0, dur: 0.95, ni, nf };
+    else state.anim = { kind: "photon-in", t: 0, dur: 1.15, ni, nf, photonEnergy: tr.dE };
+    return true;
+  }
+
+  function advanceBohr(dt) {
+    const anim = state.anim;
+    if (!anim) return;
+    anim.t += dt;
+    if (anim.t < anim.dur) return;
+    const ni = anim.ni;
+    const nf = anim.nf;
+    const tr = transition(ni, nf);
+    if (anim.kind === "jump-emit" || anim.kind === "capture") {
+      state.anim = { kind: "photon-out", t: 0, dur: 1.25, ni, nf, photonEnergy: tr.dE };
+      return;
+    }
+    if (anim.kind === "photon-in") {
+      state.anim = isFinite(nf)
+        ? { kind: "jump-absorb", t: 0, dur: 0.95, ni, nf }
+        : { kind: "escape", t: 0, dur: 1.15, ni, nf };
+      return;
+    }
+    if (anim.kind === "miss") state.displayN = ni;
+    else state.displayN = nf;
+    state.anim = null;
+  }
+
+  function sceneBusy() {
+    if (state.mode === 1) return state.alphas.length > 0;
+    if (state.mode === 2) return state.photons.length > 0 || state.electrons.length > 0;
+    if (state.mode === 3) return !!state.anim;
+    if (state.mode === 4) return state.dbPts.length > 0;
+    return true;
+  }
+
+  function update(dt) {
+    if (state.run === "stop") return;
+    if (state.mode === 1) {
+      state.acc += dt;
+      const interval = state.run === "play" ? 0.16 : 10;
+      if (state.run === "play" && state.acc >= interval && state.alphas.length < 28) {
+        state.acc = 0;
+        spawnAlpha(sampleB());
+      }
+      const Dnow = closestApproach(state.Z, state.energy);
+      state.alphas.forEach((p) => {
+        const pos = posAlong(p.path.pts, p.s, p.idx);
+        const r = Math.max(Dnow, Math.hypot(pos.x, pos.y));
+        const slow = Math.sqrt(Math.max(0, 1 - p.D / r));
+        const v = 680 * Math.sqrt(state.energy / 5) * (0.1 + 0.9 * slow);
+        p.s += v * dt;
+        const np = posAlong(p.path.pts, p.s, p.idx);
+        p.trail.push(np);
+        if (p.trail.length > 16) p.trail.shift();
+      });
+      for (let i = state.alphas.length - 1; i >= 0; i--) {
+        const p = state.alphas[i];
+        if (p.s >= p.path.total - 0.5) {
+          recordAlpha(p);
+          state.alphas.splice(i, 1);
+        }
+      }
+      state.hits.forEach((hit) => { hit.life -= dt * 0.7; });
+      state.hits = state.hits.filter((hit) => hit.life > 0);
+    } else if (state.mode === 2) {
+      const rect = sim.getBoundingClientRect();
+      const L = photoLayout(rect.width, rect.height);
+      const ph = photoCalc();
+      if (state.run === "play") {
+        state.photoAcc += dt * state.intensity * 0.18;
+        while (state.photoAcc > 1 && state.photons.length < 40) {
+          state.photoAcc -= 1;
+          state.photons.push({
+            x: rect.width * 0.1,
+            y: L.top + 28 + Math.random() * (L.bot - L.top - 56),
+            step: false
+          });
+        }
+      }
+      const colSpeed = 340;
+      state.photons.forEach((p) => { p.x += colSpeed * dt; });
+      for (let i = state.photons.length - 1; i >= 0; i--) {
+        const p = state.photons[i];
+        if (p.x >= L.cathodeX) {
+          if (ph.active) {
+            const ek0 = ph.Ek * (1 - Math.random() * Math.random() * 0.85);
+            state.electrons.push({ x: L.cathodeX + 2, y: p.y, ek0, dir: 1, step: p.step });
+          }
+          state.photons.splice(i, 1);
+        }
+      }
+      const gap = L.anodeX - L.cathodeX;
+      for (let i = state.electrons.length - 1; i >= 0; i--) {
+        const e = state.electrons[i];
+        const f = clamp((e.x - L.cathodeX) / gap, 0, 1);
+        let ek = e.ek0 + state.voltage * f;
+        if (ek <= 0) e.dir = -1;
+        if (e.dir < 0) ek = Math.max(0, e.ek0 + state.voltage * f);
+        const speed = 80 + 150 * Math.sqrt(Math.max(ek, 0.02));
+        e.x += e.dir * speed * dt;
+        if (e.dir < 0 && e.x <= L.cathodeX) state.electrons.splice(i, 1);
+        else if (e.dir > 0 && e.x >= L.anodeX && ek > 0) {
+          state.anodeFlash = 1;
+          state.electrons.splice(i, 1);
+        }
+      }
+      state.anodeFlash = Math.max(0, state.anodeFlash - dt * 2);
+    } else if (state.mode === 3) {
+      const nSpin = isFinite(state.ni) ? state.ni : 2;
+      state.angle += dt * (1.5 / nSpin);
+      if (state.anim) advanceBohr(dt);
+      else if (state.run === "play") {
+        state.cooldown -= dt;
+        if (state.cooldown <= 0) {
+          restoreLevels();
+          if (startBohr(false)) state.cooldown = 1.1;
+          else state.cooldown = 1.2;
+        }
+      }
+    } else if (state.mode === 4) {
+      state.wavePhase += dt * 5;
+      state.ringPulse = Math.max(0, state.ringPulse - dt * 1.4);
+      const rect = sim.getBoundingClientRect();
+      const crystalX = rect.width * 0.4;
+      const screenX = rect.width * 0.72;
+      const midY = rect.height * 0.42;
+      if (state.run === "play") {
+        state.dbAcc += dt;
+        if (state.dbAcc > 0.35 && state.dbPts.length < 8) {
+          state.dbAcc = 0;
+          state.dbPts.push({ x: rect.width * 0.16, y: midY + (Math.random() * 18 - 9), step: false });
+        }
+      }
+      state.dbPts.forEach((p) => { p.x += 220 * dt; });
+      for (let i = state.dbPts.length - 1; i >= 0; i--) {
+        if (state.dbPts[i].x >= crystalX) state.ringPulse = 1;
+        if (state.dbPts[i].x >= screenX) state.dbPts.splice(i, 1);
+      }
+    } else {
+      state.cloudRot += dt * 0.45;
+      state.packetT += dt;
+      if (state.packetT > 4.2) {
+        state.packetT = 0;
+        if (state.run === "step") state.run = "stop";
+      }
+    }
+    if (state.run === "step" && state.mode !== 5 && !sceneBusy()) state.run = "stop";
+  }
+
+  let savedNi = 3;
+  let savedNf = 2;
+  function restoreLevels() {
+    state.ni = savedNi;
+    state.nf = savedNf;
+    $("niSelect").value = isFinite(savedNi) ? String(savedNi) : "inf";
+    $("nfSelect").value = isFinite(savedNf) ? String(savedNf) : "inf";
+  }
+
+  function setMode(mode) {
+    state.mode = mode;
+    state.run = "stop";
+    state.hint = "default";
+    state.anim = null;
+    state.alphas = [];
+    state.photons = [];
+    state.electrons = [];
+    state.dbPts = [];
+    state.packetT = 0;
+    $("modeSelect").value = String(mode);
+    ["leftCol", "rightCol"].forEach((id) => {
+      const el = $(id);
+      el.classList.remove("m1", "m2", "m3", "m4", "m5");
+      el.classList.add("m" + mode);
+    });
+    const hints = {
+      1: "ยิงอนุภาคแอลฟาหนึ่งอนุภาค",
+      2: "ยิงโฟตอนชุดหนึ่ง",
+      3: "เกิดการเปลี่ยนระดับหนึ่งครั้ง",
+      4: "ยิงอิเล็กตรอนหนึ่งตัว",
+      5: "ปล่อยแพ็กเก็ตคลื่นหนึ่งครั้ง"
+    };
+    $("stepHint").textContent = hints[mode];
+    updateReadouts();
+  }
+
+  function resetRun() {
+    state.run = "stop";
+    clearRutherfordRun();
+    state.photons = [];
+    state.electrons = [];
+    state.dbPts = [];
+    state.anim = null;
+    state.packetT = 0;
+    state.anodeFlash = 0;
+    state.angle = 0.6;
+    restoreLevels();
+    state.displayN = savedNi;
+    state.hint = "default";
+  }
+
+  function doStep() {
+    const playing = state.run === "play";
+    const arm = () => { if (!playing) state.run = "step"; };
+    if (state.mode === 1) {
+      spawnAlpha(sampleB());
+      arm();
+    } else if (state.mode === 2) {
+      if (spawnPhotonBurst(true)) arm();
+    } else if (state.mode === 3) {
+      restoreLevels();
+      if (startBohr(false)) arm();
+    } else if (state.mode === 4) {
+      const rect = sim.getBoundingClientRect();
+      state.dbPts.push({ x: rect.width * 0.16, y: rect.height * 0.42, step: true });
+      arm();
+    } else {
+      state.packetT = 0;
+      state.cloud = sampleCloud(state.orbital, 1100);
+      if (!playing) state.run = "step";
+    }
+  }
+
+  function fillLevelSelect(select, value) {
+    select.innerHTML = "";
+    for (let n = 1; n <= 6; n++) {
+      const op = document.createElement("option");
+      op.value = String(n);
+      op.textContent = "n = " + n;
+      select.appendChild(op);
+    }
+    const inf = document.createElement("option");
+    inf.value = "inf";
+    inf.textContent = "∞ (ไอออไนเซชัน / อิสระ)";
+    select.appendChild(inf);
+    select.value = String(value);
+  }
+
+  function readN(select) { return select.value === "inf" ? Infinity : Number(select.value); }
+
+  function bind() {
+    fillLevelSelect($("niSelect"), 3);
+    fillLevelSelect($("nfSelect"), 2);
+    $("modeSelect").addEventListener("change", () => setMode(Number($("modeSelect").value)));
+    $("playBtn").addEventListener("click", () => {
+      if (state.mode === 3) {
+        restoreLevels();
+        state.displayN = state.ni;
+        state.cooldown = 0.05;
+      }
+      state.run = "play";
+    });
+    $("pauseBtn").addEventListener("click", () => { state.run = "stop"; });
+    $("stepBtn").addEventListener("click", doStep);
+    $("resetBtn").addEventListener("click", resetRun);
+    $("energySlider").addEventListener("input", () => {
+      state.energy = Number($("energySlider").value);
+      $("energyOut").textContent = state.energy.toFixed(1) + " MeV";
+      clearRutherfordRun();
+      rebuildGhosts();
+      state.hint = "energy";
+    });
+    document.querySelectorAll("#zChoices button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.Z = Number(btn.dataset.z);
+        document.querySelectorAll("#zChoices button").forEach((b) => b.classList.toggle("sel", b === btn));
+        clearRutherfordRun();
+        rebuildGhosts();
+        state.hint = "energy";
+      });
+    });
+    $("lambdaSlider").addEventListener("input", () => {
+      state.lambda = Number($("lambdaSlider").value);
+      $("lambdaOut").textContent = state.lambda.toFixed(0) + " nm";
+      state.hint = "lambda";
+    });
+    document.querySelectorAll("#colorChoices button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.lambda = Number(btn.dataset.lam);
+        $("lambdaSlider").value = String(state.lambda);
+        $("lambdaOut").textContent = state.lambda + " nm";
+        state.hint = "lambda";
+      });
+    });
+    $("intensitySlider").addEventListener("input", () => {
+      state.intensity = Number($("intensitySlider").value);
+      $("intensityOut").textContent = state.intensity + "%";
+      state.hint = "intensity";
+    });
+    $("voltageSlider").addEventListener("input", () => {
+      state.voltage = Number($("voltageSlider").value);
+      $("voltageOut").textContent = state.voltage.toFixed(2) + " V";
+      state.hint = "voltage";
+    });
+    document.querySelectorAll("#metalChoices button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.metal = btn.dataset.metal;
+        document.querySelectorAll("#metalChoices button").forEach((b) => b.classList.toggle("sel", b === btn));
+        $("customBox").classList.toggle("hidden", state.metal !== "custom");
+        if (state.metal !== "custom") state.W = Number(btn.dataset.w);
+        else state.W = Number($("wSlider").value);
+        $("wOut").textContent = state.W.toFixed(2) + " eV";
+        state.hint = "metal";
+      });
+    });
+    $("wSlider").addEventListener("input", () => {
+      state.W = Number($("wSlider").value);
+      $("wOut").textContent = state.W.toFixed(2) + " eV";
+      state.hint = "metal";
+    });
+    const onLevel = () => {
+      state.ni = readN($("niSelect"));
+      state.nf = readN($("nfSelect"));
+      savedNi = state.ni;
+      savedNf = state.nf;
+      state.displayN = state.ni;
+      state.anim = null;
+      state.hint = state.ni === state.nf ? "same" : "bohr";
+      document.querySelectorAll("#seriesChoices button").forEach((b) => {
+        b.classList.toggle("sel", Number(b.dataset.nf) === state.nf && state.nf < state.ni);
+      });
+    };
+    $("niSelect").addEventListener("change", onLevel);
+    $("nfSelect").addEventListener("change", onLevel);
+    document.querySelectorAll("#seriesChoices button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const nf = Number(btn.dataset.nf);
+        state.nf = nf;
+        state.ni = Math.min(6, nf + 1);
+        savedNi = state.ni;
+        savedNf = state.nf;
+        state.displayN = state.ni;
+        $("nfSelect").value = String(state.nf);
+        $("niSelect").value = String(state.ni);
+        state.anim = null;
+        state.hint = "bohr";
+        document.querySelectorAll("#seriesChoices button").forEach((b) => b.classList.toggle("sel", b === btn));
+      });
+    });
+    $("wrongPhotonBtn").addEventListener("click", () => {
+      restoreLevels();
+      if (startBohr(true)) state.run = state.run === "play" ? "play" : "step";
+    });
+    $("diagramToggle").addEventListener("change", () => { state.showDiagram = $("diagramToggle").checked; });
+    $("vaccSlider").addEventListener("input", () => {
+      const t = Number($("vaccSlider").value) / 1000;
+      state.vacc = 10 * 1000 ** t;
+      $("vaccOut").textContent = Math.round(state.vacc) + " V";
+      state.hint = "vacc";
+    });
+    $("dxSlider").addEventListener("input", () => {
+      state.dxNm = Number($("dxSlider").value) / 1000;
+      $("dxOut").textContent = state.dxNm.toFixed(3) + " nm";
+      state.packetT = 0;
+      state.hint = "dx";
+    });
+    $("bohrRadiusBtn").addEventListener("click", () => {
+      state.dxNm = 0.053;
+      $("dxSlider").value = "53";
+      $("dxOut").textContent = "0.053 nm";
+      state.packetT = 0;
+      state.hint = "dx";
+    });
+    document.querySelectorAll("#orbitalChoices button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.orbital = btn.dataset.orb;
+        document.querySelectorAll("#orbitalChoices button").forEach((b) => b.classList.toggle("sel", b === btn));
+        state.cloud = sampleCloud(state.orbital, 1100);
+      });
+    });
+    sim.addEventListener("click", (ev) => {
+      if (state.mode !== 1) return;
+      const rect = sim.getBoundingClientRect();
+      const cam = camera(rect.width, rect.height);
+      const yPx = ev.clientY - rect.top;
+      const yfm = 750 - (yPx - cam.oy) / cam.scale;
+      spawnAlpha(clamp(yfm, -400, 400));
+      if (state.run !== "play") state.run = "step";
+    });
+    window.addEventListener("keydown", (ev) => {
+      if (ev.target && ["INPUT", "SELECT", "TEXTAREA", "BUTTON"].includes(ev.target.tagName)) return;
+      if (ev.code === "Space") { ev.preventDefault(); state.run = state.run === "play" ? "stop" : "play"; }
+      else if (ev.key === "s" || ev.key === "S") doStep();
+      else if (ev.key === "r" || ev.key === "R") resetRun();
+    });
+    const hash = Number(location.hash.replace("#", ""));
+    if (hash >= 1 && hash <= 5) setMode(hash);
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.033, (now - last) / 1000);
+    last = now;
+    update(dt);
+    const view = fitCanvas(sim);
+    if (view) {
+      if (state.mode === 1) drawRutherford(view.ctx, view.w, view.h);
+      else if (state.mode === 2) drawPhoto(view.ctx, view.w, view.h);
+      else if (state.mode === 3) drawBohr(view.ctx, view.w, view.h);
+      else if (state.mode === 4) drawDeBroglie(view.ctx, view.w, view.h);
+      else drawCloud(view.ctx, view.w, view.h);
+    }
+    drawGraphs();
+    state.accUi = (state.accUi || 0) + dt;
+    if (state.accUi > 0.12) {
+      state.accUi = 0;
+      updateReadouts();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  rebuildGhosts();
+  state.cloud = sampleCloud("1s", 1100);
+  bind();
+  updateReadouts();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
