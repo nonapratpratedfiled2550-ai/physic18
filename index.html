@@ -158,8 +158,16 @@
     border: 1px solid rgba(176, 206, 245, 0.14);
     backdrop-filter: blur(10px);
   }
-  #caption, #legend { margin: 0; color: var(--muted); font-size: 13px; }
-  #caption { color: var(--text); }
+  #caption { margin: 0; color: var(--text); font-size: 16px; line-height: 1.45; }
+  #legend { display: none; }
+  .guide {
+    margin: 0 0 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(62, 224, 197, 0.1);
+    color: var(--text);
+    font-size: 13.5px;
+  }
   .scrim {
     position: absolute;
     inset: 0;
@@ -305,15 +313,15 @@
       <p>ม.6 · ตามแนว สสวท.</p>
     </div>
     <select id="modeSelect">
-      <option value="1">1. การกระเจิงรังสีแอลฟาของรัทเทอร์ฟอร์ด</option>
-      <option value="2">2. ปรากฏการณ์โฟโตอิเล็กทริก</option>
-      <option value="3">3. แบบจำลองอะตอมของโบร์และสเปกตรัมไฮโดรเจน</option>
-      <option value="4">4. ความยาวคลื่นเดอบรอยล์และการเลี้ยวเบนอิเล็กตรอน</option>
-      <option value="5">5. หลักความไม่แน่นอนและแบบจำลองกลุ่มหมอก</option>
+      <option value="1">1. รัทเทอร์ฟอร์ด — ยิงอนุภาคแอลฟา</option>
+      <option value="2">2. โฟโตอิเล็กทริก — แสงชนโลหะ</option>
+      <option value="3">3. อะตอมของโบร์ — ชั้นพลังงาน</option>
+      <option value="4">4. เดอบรอยล์ — คลื่นของอิเล็กตรอน</option>
+      <option value="5">5. ไฮเซนเบิร์ก — กลุ่มหมอก</option>
     </select>
     <div class="transport">
       <button type="button" class="primary" id="playBtn">เริ่ม</button>
-      <button type="button" id="pauseBtn">หยุดชั่วคราว</button>
+      <button type="button" id="pauseBtn">หยุด</button>
       <button type="button" id="stepBtn">ทีละครั้ง</button>
       <button type="button" id="resetBtn">ตั้งค่าใหม่</button>
     </div>
@@ -327,6 +335,7 @@
     <p class="hintline" id="stepHint">ยิงอนุภาคแอลฟาหนึ่งอนุภาค</p>
 
     <div class="panel o1">
+      <p class="guide">เส้นที่ผ่านไกลจะตรง เส้นที่ชนใกล้กลางจะเลี้ยว ถ้าชนตรง ๆ จะสะท้อนกลับ</p>
       <h2>แผ่นโลหะและพลังงานแอลฟา</h2>
       <div class="slider-label"><span>พลังงานจลน์ของอนุภาคแอลฟา</span><span class="val" id="energyOut">5.0 MeV</span></div>
       <input type="range" id="energySlider" min="1" max="10" step="0.1" value="5">
@@ -336,10 +345,11 @@
         <button type="button" data-z="29">ทองแดง 29</button>
         <button type="button" data-z="13">อะลูมิเนียม 13</button>
       </div>
-      <p class="hintline">คลิกบนจอจำลองเพื่อยิงที่ความสูงนั้น เส้นจางคือแนวโคจรของระยะกระทบต่าง ๆ</p>
+      <p class="hintline">คลิกบนจอเพื่อยิงที่ความสูงนั้น</p>
     </div>
 
     <div class="panel o2">
+      <p class="guide">เปลี่ยนสีแสงแล้วพลังงานอิเล็กตรอนเปลี่ยน เปลี่ยนความสว่างแล้วมีจำนวนอิเล็กตรอนมากขึ้น แต่พลังงานต่อตัวเท่าเดิม</p>
       <h2>แสงและขั้วไฟฟ้า</h2>
       <div class="slider-label"><span>ความยาวคลื่นแสง λ</span><span class="val" id="lambdaOut">400 nm</span></div>
       <input type="range" id="lambdaSlider" min="100" max="800" step="1" value="400">
@@ -372,12 +382,13 @@
     </div>
 
     <div class="panel o3">
+      <p class="guide">อิเล็กตรอนอยู่ได้เฉพาะชั้นที่ขีดไว้ ชั้นปลายต่ำกว่า = ปล่อยแสง ชั้นปลายสูงกว่า = ดูดกลืนแสง</p>
       <h2>การเปลี่ยนระดับพลังงาน</h2>
       <div class="slider-label"><span>ระดับต้น nᵢ</span></div>
       <select id="niSelect"></select>
       <div class="slider-label" style="margin-top:8px"><span>ระดับปลาย n<sub>f</sub></span></div>
       <select id="nfSelect"></select>
-      <p class="hintline">n_f &lt; nᵢ คือการปล่อยโฟตอน · n_f &gt; nᵢ คือการดูดกลืน · ∞ คือไอออไนเซชัน</p>
+      <p class="hintline">∞ หมายถึงอิเล็กตรอนหลุดพ้นจากอะตอม</p>
       <h2>อนุกรมสเปกตรัม</h2>
       <div class="choices" id="seriesChoices">
         <button type="button" data-nf="1">ไลแมน</button>
@@ -395,13 +406,15 @@
     </div>
 
     <div class="panel o4">
+      <p class="guide">เลื่อนศักย์สูงขึ้น อิเล็กตรอนเร็วขึ้น คลื่นของมันถี่ขึ้น และวงบนฉากเล็กลง</p>
       <h2>ปืนอิเล็กตรอน</h2>
       <div class="slider-label"><span>ศักย์เร่ง V</span><span class="val" id="vaccOut">2500 V</span></div>
       <input type="range" id="vaccSlider" min="0" max="1000" step="1" value="799">
-      <p class="hintline">สเกลลอการิทึม 10 V ถึง 10 000 V · สูตรแบบเรียน λ = 1.228 / √V nm</p>
+      <p class="hintline">เลื่อนได้ตั้งแต่ 10 V ถึง 10 000 V</p>
     </div>
 
     <div class="panel o5">
+      <p class="guide">ยิ่งกำหนดตำแหน่งให้แคบ ความเร็วจะยิ่งกำกวม กลุ่มหมอกคือโอกาสที่จะพบอิเล็กตรอน ไม่ใช่วงโคจร</p>
       <h2>ความไม่แน่นอนของตำแหน่ง</h2>
       <div class="slider-label"><span>Δx</span><span class="val" id="dxOut">0.053 nm</span></div>
       <input type="range" id="dxSlider" min="8" max="800" step="1" value="53">
@@ -414,9 +427,8 @@
         <button type="button" data-orb="2s">2s</button>
         <button type="button" data-orb="2p">2p</button>
       </div>
-      <p class="hintline">1s ทรงกลม · 2s มีโหนด · 2p สองพู ภาพนี้คือความน่าจะเป็น ไม่ใช่ทางโคจรเส้นบาง</p>
+      <p class="hintline">1s กลมทั้งก้อน · 2s มีช่องว่างตรงกลาง · 2p เป็นสองพู</p>
     </div>
-    <p class="keys">แป้นพิมพ์: Space เริ่ม/หยุด · S ทีละครั้ง · R ตั้งค่าใหม่ · Esc ปิดแผง</p>
   </section>
 
   <aside class="sheet sheet-right modecol m1" id="rightCol">
@@ -425,24 +437,24 @@
       <button type="button" class="sheet-close" id="closeGraphs">ปิด</button>
     </div>
     <div class="block meters only o2">
-      <div class="meter" id="ammeterBox"><div class="k">แอมมิเตอร์ · กระแสโฟโตอิเล็กตรอน</div><div class="v" id="ammeter">0.00 µA</div></div>
-      <div class="meter" id="voltmeterBox"><div class="k">โวลต์มิเตอร์ · V ที่ตั้งไว้</div><div class="v" id="voltmeter">0.00 V</div></div>
+      <div class="meter" id="ammeterBox"><div class="k">กระแสที่วัดได้</div><div class="v" id="ammeter">0.00 µA</div></div>
+      <div class="meter" id="voltmeterBox"><div class="k">ศักย์ที่ตั้งไว้</div><div class="v" id="voltmeter">0.00 V</div></div>
     </div>
     <div class="block meters only o1">
-      <div class="meter"><div class="k">ยิงแล้ว</div><div class="v" id="countAll">0</div></div>
-      <div class="meter"><div class="k">สะท้อนกลับ θ &gt; 90°</div><div class="v" id="countBack">0</div></div>
+      <div class="meter"><div class="k">ยิงไปแล้ว</div><div class="v" id="countAll">0</div></div>
+      <div class="meter"><div class="k">สะท้อนกลับ</div><div class="v" id="countBack">0</div></div>
     </div>
     <div class="block meters only o3">
-      <div class="meter"><div class="k">ΔE ของการเปลี่ยนระดับ</div><div class="v" id="meterDE">—</div></div>
-      <div class="meter"><div class="k">ความยาวคลื่นโฟตอน</div><div class="v" id="meterLam">—</div></div>
+      <div class="meter"><div class="k">พลังงานที่ต่างกัน</div><div class="v" id="meterDE">—</div></div>
+      <div class="meter"><div class="k">สีของแสงที่ได้</div><div class="v" id="meterLam">—</div></div>
     </div>
     <div class="block meters only o4">
-      <div class="meter"><div class="k">λ เดอบรอยล์</div><div class="v" id="meterDb">—</div></div>
-      <div class="meter"><div class="k">อัตราเร็วอิเล็กตรอน</div><div class="v" id="meterSpeed">—</div></div>
+      <div class="meter"><div class="k">ความยาวคลื่น</div><div class="v" id="meterDb">—</div></div>
+      <div class="meter"><div class="k">ความเร็ว</div><div class="v" id="meterSpeed">—</div></div>
     </div>
     <div class="block meters only o5">
-      <div class="meter"><div class="k">Δx</div><div class="v" id="meterDx">—</div></div>
-      <div class="meter"><div class="k">Δp ต่ำสุด</div><div class="v" id="meterDp">—</div></div>
+      <div class="meter"><div class="k">ความกว้างตำแหน่ง</div><div class="v" id="meterDx">—</div></div>
+      <div class="meter"><div class="k">ความกำกวมของโมเมนตัม</div><div class="v" id="meterDp">—</div></div>
     </div>
 
     <div class="block">
@@ -600,7 +612,7 @@
 
   function rebuildGhosts() {
     const D = closestApproach(state.Z, state.energy);
-    const bs = [8, 16, 28, 48, 80, 130, 200, 300];
+    const bs = [22, 70, 180, 320];
     state.ghosts = [];
     bs.forEach((b) => {
       state.ghosts.push(buildPath(b, D));
@@ -908,7 +920,7 @@
     ctx.fillText("แผ่น" + metal.name + "  Z = " + state.Z, cam.X(24), cam.Y(640));
     font(ctx, 12);
     ctx.fillStyle = "#c9d7ea";
-    ctx.fillText("d₀", cam.X(D) + 6, cam.Y(0) - 6);
+    ctx.fillText("ระยะชนตรง", cam.X(D) + 8, cam.Y(0) - 8);
     const bar = 100 * cam.scale;
     ctx.strokeStyle = "#d5e2f5";
     ctx.beginPath();
@@ -949,7 +961,6 @@
     drawLab(ctx, w, h);
     const L = photoLayout(w, h);
     const col = wavelengthColor(state.lambda);
-    const ph = photoCalc();
     ctx.save();
     const tubeG = ctx.createLinearGradient(0, L.top, 0, L.bot);
     tubeG.addColorStop(0, "rgba(120,170,210,0.08)");
@@ -1047,12 +1058,6 @@
     ctx.fillStyle = state.anodeFlash > 0 ? "#b8ffcf" : "#c5d4e8";
     ctx.fillText("A", ax - 5, ay + 5);
 
-    font(ctx, 13);
-    ctx.fillStyle = ph.active ? "#d9fff4" : "#ffc1b6";
-    const status = !ph.active ? "hf < W  อิเล็กตรอนไม่หลุด" : state.voltage <= -ph.Vs ? "ศักย์ย้อนกลับหยุดอิเล็กตรอนทั้งหมด" : "เกิดโฟโตอิเล็กตรอน";
-    ctx.fillText(status, w * 0.18, h - 28);
-    ctx.fillStyle = "#d5e2f5";
-    ctx.fillText(col.band + "   W = " + fixed(state.W, 2) + " eV", w * 0.18, h - 10);
     ctx.restore();
   }
 
@@ -1165,11 +1170,6 @@
     }
 
     const tr = transition(state.ni, state.nf);
-    font(ctx, 14, "700");
-    ctx.fillStyle = "#f3e7c8";
-    const kind = state.ni === state.nf ? "ไม่มีการเปลี่ยนระดับ" : tr.emit ? "ปล่อยโฟตอน" : (!isFinite(state.nf) ? "ไอออไนเซชัน" : "ดูดกลืนโฟตอน");
-    ctx.fillText(kind + " · " + seriesName(state.ni, state.nf), 16, h - 16);
-
     if (show) drawEnergyDiagram(ctx, w - diagramW + 8, 28, diagramW - 16, h - 48, tr);
     ctx.restore();
   }
@@ -1285,11 +1285,9 @@
       ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
       ctx.fill();
     });
-    font(ctx, 13);
+    font(ctx, 14, "700");
     ctx.fillStyle = "#d9fff0";
-    ctx.fillText(visible.length ? "วงเลี้ยวเบน " + visible.length + " วงบนฉาก" : "วงอยู่นอกฉากด้านหน้า ลองเพิ่มศักย์เร่ง", 16, h - 36);
-    ctx.fillStyle = "#c5d6ea";
-    ctx.fillText("λ = " + db.lam.toFixed(4) + " nm   ภาพคลื่นปรับมาตราส่วนให้มองเห็นได้", 16, h - 16);
+    ctx.fillText(visible.length ? "วงบนฉาก " + visible.length + " วง" : "วงใหญ่เกินฉาก ลองเพิ่มศักย์", 16, 36);
     ctx.restore();
   }
 
@@ -1328,10 +1326,10 @@
     });
     font(ctx, 13, "700");
     ctx.fillStyle = "#f4e7c8";
-    ctx.fillText("ออร์บิทัล " + state.orbital, 16, 28);
+    ctx.fillText("กลุ่มหมอก " + state.orbital, 16, 28);
     font(ctx, 12);
     ctx.fillStyle = "#c5d4e8";
-    ctx.fillText("เส้นประ = วงโบร์ n = " + nOrbit + " (แนวเทียบ ไม่ใช่รางโคจร)", 16, topH - 12);
+    ctx.fillText("เส้นประเป็นแค่แนวเทียบ ไม่ใช่รางที่อิเล็กตรอนวิ่ง", 16, topH - 12);
 
     const baseY = h * 0.86;
     ctx.strokeStyle = "rgba(200,214,230,0.4)";
@@ -1365,10 +1363,7 @@
     ctx.setLineDash([]);
     font(ctx, 12);
     ctx.fillStyle = "#ffe1a8";
-    ctx.fillText("แพ็กเก็ตคลื่นเริ่มต้นกว้าง Δx = " + state.dxNm.toFixed(3) + " nm", 30, h * 0.70);
-    ctx.fillStyle = "#c5d4e8";
-    const msg = state.packetT > 0.05 ? "ยิ่ง Δx เริ่มต้นแคบ แพ็กเก็ตยิ่งกระจายเร็ว" : "กดเริ่มเพื่อดูการกระจายของแพ็กเก็ต";
-    ctx.fillText(msg, 30, h * 0.745);
+    ctx.fillText("ถ้ายิ่งจับตำแหน่งให้แคบ กลุ่มนี้ยิ่งกระจายเร็ว", 30, h * 0.72);
     ctx.restore();
   }
 
@@ -1721,22 +1716,15 @@
 
   function updateReadouts() {
     const titles = {
-      1: ["ฮิสโทแกรมมุมกระเจิง", "ความสัมพันธ์ θ กับ b"],
-      2: ["กราฟ I–V", "กราฟ Ek,max กับความถี่"],
-      3: ["ระดับพลังงานของไฮโดรเจน", "เส้นสเปกตรัมของอนุกรม"],
-      4: ["ความยาวคลื่นเดอบรอยล์กับศักย์เร่ง", "มุมเลี้ยวเบนแต่ละอันดับ"],
-      5: ["การกระจายตำแหน่ง กว้าง Δx", "การกระจายโมเมนตัม กว้าง Δp"]
+      1: ["อนุภาคเลี้ยวมุมเท่าไร", "ยิ่งชนใกล้ ยิ่งเลี้ยวมาก"],
+      2: ["กระแสไฟฟ้ากับศักย์", "พลังงานอิเล็กตรอนกับสีของแสง"],
+      3: ["พลังงานแต่ละชั้น", "แสงที่ปล่อยหรือดูดกลืน"],
+      4: ["คลื่นสั้นลงเมื่อศักย์สูงขึ้น", "วงเลี้ยวเบนแต่ละวง"],
+      5: ["ยิ่งรู้ตำแหน่งแน่ กราฟนี้ยิ่งแคบ", "ยิ่งรู้ตำแหน่งแน่ กราฟนี้ยิ่งกว้าง"]
     };
     $("gTitleA").textContent = titles[state.mode][0];
     $("gTitleB").textContent = titles[state.mode][1];
-    const hud = {
-      1: "การกระเจิงของรัทเทอร์ฟอร์ด",
-      2: "ปรากฏการณ์โฟโตอิเล็กทริก",
-      3: "อะตอมของโบร์และสเปกตรัมไฮโดรเจน",
-      4: "คลื่นเดอบรอยล์ของอิเล็กตรอน",
-      5: "หลักความไม่แน่นอนและกลุ่มหมอก"
-    };
-    $("hudTitle").textContent = hud[state.mode];
+    $("hudTitle").textContent = "";
     $("playBtn").classList.toggle("active", state.run === "play");
     $("pauseBtn").classList.toggle("active", state.run !== "play");
 
@@ -1746,60 +1734,54 @@
       const metal = METALS[state.Z];
       $("countAll").textContent = String(state.total);
       $("countBack").textContent = String(state.back);
-      const last = state.last ? `b = ${state.last.b.toFixed(0)} fm → θ = ${state.last.deg.toFixed(0)}°` : "ยังไม่มียิงสด";
-      $("cards1").innerHTML = `<div class="eq">d₀ = (1.44 MeV·fm) × 2 × ${state.Z} / ${state.energy.toFixed(1)} MeV<br>= ${D.toFixed(1)} fm = ${sci(D * 1e-15)} m<br>รัศมีนิวเคลียส ${metal.symbol} ≈ ${R.toFixed(1)} fm<br>d₀ / R ≈ ${(D / R).toFixed(1)}</div><p>${last}</p><p>เบี่ยงมากกว่า 20° : ${state.wide} อนุภาค จาก ${state.total}</p><p>วงประรอบนิวเคลียสคือระยะเข้าใกล้สุดเมื่อชนตรง d₀ ยิ่งพลังงานสูงหรือ Z ต่ำ วงนี้ยิ่งเล็ก</p>`;
-      $("hudStatus").textContent = state.run === "play" ? "กำลังยิงลำอนุภาค" : "หยุดอยู่";
-      $("caption").textContent = "อนุภาคที่ผ่านไกลจากนิวเคลียสแทบไม่เบี่ยง อนุภาคที่เข้าใกล้ถูกแรงคูลอมบ์ผลักให้เบี่ยงมาก บางครั้งสะท้อนกลับ";
-      $("legend").textContent = "สีเขียวอมฟ้า θ < 30° · สีทอง 30°–90° · สีแดง θ > 90° · เส้นจางคือแนวโคจรตัวอย่าง ไม่ถูกนับในฮิสโทแกรม";
+      const last = state.last ? `อนุภาคล่าสุดเลี้ยว ${state.last.deg.toFixed(0)}°` : "กดเริ่ม หรือคลิกบนจอเพื่อยิง";
+      $("cards1").innerHTML = `<div class="eq">ระยะชนตรง = ${D.toFixed(1)} fm<br>นิวเคลียส${metal.name} กว้างประมาณ ${R.toFixed(1)} fm<br>ระยะชนตรงใหญ่กว่านิวเคลียส ${(D / R).toFixed(1)} เท่า</div><p>${last}</p><p>เลี้ยวมากกว่า 20° แล้ว ${state.wide} จาก ${state.total} อนุภาค</p>`;
+      $("hudStatus").textContent = state.run === "play" ? "กำลังยิง" : "";
+      $("caption").textContent = "ส่วนใหญ่พุ่งตรง เพราะอะตอมเกือบทั้งก้อนเป็นที่ว่าง มีแค่ตอนชนใกล้นิวเคลียสเท่านั้นที่เลี้ยวมาก";
     } else if (state.mode === 2) {
       const ph = photoCalc();
       $("ammeter").textContent = ph.I.toFixed(2) + " µA";
       $("voltmeter").textContent = state.voltage.toFixed(2) + " V";
       $("ammeterBox").classList.toggle("hot", ph.I > 0.02);
       const eq = ph.active
-        ? `hf = ${ph.E.toFixed(2)} eV<br>W = ${ph.W.toFixed(2)} eV<br>Ek,max = hf − W = ${ph.Ek.toFixed(2)} eV<br>Vs = ${ph.Vs.toFixed(2)} V<br>f = ${sci(ph.f)} Hz<br>f₀ = ${sci(ph.f0)} Hz · λ₀ = ${ph.lam0.toFixed(1)} nm`
-        : `hf = ${ph.E.toFixed(2)} eV &lt; W = ${ph.W.toFixed(2)} eV<br>Ek,max = 0 · Vs = 0<br>f₀ = ${sci(ph.f0)} Hz · λ₀ = ${ph.lam0.toFixed(1)} nm`;
-      $("cards2").innerHTML = `<div class="eq">${eq}</div><p>พลังงานโฟตอน = ${sci(ph.EJ)} J · พลังงานจลน์สูงสุด = ${sci(ph.EkJ)} J</p><p>กระแสอิ่มตัวในแบบจำลองนี้คือ ${(5 * state.intensity / 100).toFixed(2)} µA เมื่อ V ≥ 0 และเกิดโฟโตอิเล็กตรอน</p><p>กราฟ I–V เป็นแบบจำลองระดับมัธยม: กระแสเป็นศูนย์เมื่อ V ≤ −Vs และอิ่มตัวเมื่อ V ≥ 0</p>`;
+        ? `${ph.E.toFixed(2)} eV = งาน ${ph.W.toFixed(2)} eV + พลังงานอิเล็กตรอน ${ph.Ek.toFixed(2)} eV<br>ศักย์หยุดยั้ง Vs = ${ph.Vs.toFixed(2)} V<br>แสงต้องสั้นกว่า ${ph.lam0.toFixed(0)} nm จึงจะหลุด`
+        : `พลังงานแสง ${ph.E.toFixed(2)} eV น้อยกว่างานดึงอิเล็กตรอน ${ph.W.toFixed(2)} eV<br>ต้องใช้แสงสั้นกว่า ${ph.lam0.toFixed(0)} nm`;
+      $("cards2").innerHTML = `<div class="eq">${eq}</div>`;
       $("rainbowMark").style.left = ((state.lambda - 100) / 700 * 100) + "%";
-      const band = wavelengthColor(state.lambda).band;
-      $("hudStatus").textContent = !ph.active ? "ต่ำกว่าขีดเริ่ม" : (state.voltage <= -ph.Vs ? "กระแสเป็นศูนย์" : ph.I.toFixed(2) + " µA");
+      $("hudStatus").textContent = !ph.active ? "แสงพลังงานไม่พอ" : (state.voltage <= -ph.Vs ? "ศักย์ดึงอิเล็กตรอนกลับหมด" : "มีอิเล็กตรอนหลุด");
       $("caption").textContent = ph.active
-        ? `โฟตอนสีตาม λ = ${state.lambda} nm (${band}) พลังงาน ${ph.E.toFixed(2)} eV ทำให้อิเล็กตรอนหลุดด้วย Ek,max = ${ph.Ek.toFixed(2)} eV`
-        : `แสงนี้เป็น${band} แต่ hf ยังไม่ถึงฟังก์ชันงาน อิเล็กตรอนจึงไม่หลุด แม้เพิ่มความเข้มแสง`;
-      $("legend").textContent = "ความเข้มเปลี่ยนจำนวนอิเล็กตรอน · ความถี่เปลี่ยนพลังงานของอิเล็กตรอนแต่ละตัว · ศักย์ลบคือศักย์ย้อนกลับ";
+        ? "แสงก้อนนี้พลังงานพอ ทำให้อิเล็กตรอนหลุดได้ ความสว่างเพิ่มจำนวน ไม่ได้เพิ่มพลังงานของแต่ละตัว"
+        : "แสงก้อนนี้พลังงานไม่พอ อิเล็กตรอนไม่หลุด แม้จะทำให้สว่างขึ้นก็ตาม";
     } else if (state.mode === 3) {
       const tr = transition(state.ni, state.nf);
       const rn = isFinite(state.ni) ? state.ni * state.ni * 0.053 : NaN;
-      const rf = isFinite(state.nf) ? state.nf * state.nf * 0.053 : NaN;
       $("meterDE").textContent = tr.dE > 0 ? tr.dE.toFixed(2) + " eV" : "0";
       $("meterLam").textContent = isFinite(tr.lam) ? tr.lam.toFixed(1) + " nm" : "—";
       const col = isFinite(tr.lam) ? wavelengthColor(tr.lam) : null;
-      $("cards3").innerHTML = `<div class="eq">E_${nLabel(state.ni)} = ${fixed(tr.Ei, 2)} eV<br>E_${nLabel(state.nf)} = ${fixed(tr.Ef, 2)} eV<br>ΔE = ${tr.dE.toFixed(2)} eV = hf<br>λ = hc/ΔE = ${isFinite(tr.lam) ? tr.lam.toFixed(1) : "—"} nm<br>จากไรด์เบิร์ก λ = ${isFinite(tr.lamR) ? tr.lamR.toFixed(1) : "—"} nm<br>r_${nLabel(state.ni)} = ${isFinite(rn) ? rn.toFixed(3) : "—"} nm</div><p>${seriesName(state.ni, state.nf)}${col ? " · " + col.band : ""}</p><p>r_f = ${isFinite(rf) ? rf.toFixed(3) + " nm" : "—"} · L = n h/2π เมื่อ n = ${nLabel(state.ni)} ได้ ${isFinite(state.ni) ? sci(state.ni * 1.055e-34) + " J·s" : "—"}</p><p>ค่า λ จากพลังงานกับจากสมการไรด์เบิร์กต่างกันเล็กน้อย เพราะ 13.6 eV, hc และ R_H ในแบบเรียนถูกปัดเศษ</p>`;
-      $("hudStatus").textContent = state.ni === state.nf ? "ΔE = 0" : (tr.emit ? "ปล่อยโฟตอน" : "ดูดกลืนโฟตอน");
-      $("caption").textContent = "อิเล็กตรอนอยู่ได้เฉพาะชั้น n = 1, 2, 3, … วงในภาพเป็นสัดส่วน r ∝ n² จริง จึงเห็นชั้นในเล็กและชั้นนอกห่างมาก";
-      $("legend").textContent = "ลูกกลมฟ้าคืออิเล็กตรอน · จุดสว่างสีตรงตามความยาวคลื่นคือโฟตอน · เส้นประในกราฟสเปกตรัมคือขอบอนุกรม";
+      const verb = state.ni === state.nf ? "ไม่มีการเปลี่ยนชั้น" : tr.emit ? "ปล่อยแสง" : "ดูดกลืนแสง";
+      $("cards3").innerHTML = `<div class="eq">${verb} ${seriesName(state.ni, state.nf)}<br>พลังงานที่ต่างกัน ${tr.dE.toFixed(2)} eV<br>ความยาวคลื่น ${isFinite(tr.lam) ? tr.lam.toFixed(0) + " nm" : "—"} ${col ? "· " + col.band : ""}<br>ชั้น n = ${nLabel(state.ni)} ห่างจากนิวเคลียส ${isFinite(rn) ? rn.toFixed(3) + " nm" : "—"}</div>`;
+      $("hudStatus").textContent = verb;
+      $("caption").textContent = "อิเล็กตรอนกระโดดได้เฉพาะระหว่างชั้นที่มีเส้นวง ไม่ได้ค้างอยู่ระหว่างชั้น";
     } else if (state.mode === 4) {
       const db = debroglieCalc();
       const rings = braggRings(db.lam);
       $("meterDb").textContent = db.lam.toFixed(4) + " nm";
       $("meterSpeed").textContent = sci(db.v) + " m/s";
-      $("cards4").innerHTML = `<div class="eq">λ = 1.228 / √${Math.round(db.V)} = ${db.lam.toFixed(4)} nm<br>= ${sci(db.lam * 1e-9)} m<br>v = ${sci(db.v)} m/s<br>p = mv = ${sci(db.p)} kg·m/s<br>h/p = ${db.lamH.toFixed(4)} nm</div><p>ผลึกแกรไฟต์ในแบบจำลองใช้ d = 0.213 nm และกฎของแบรกก์ nλ = 2d sinθ เพื่อวางวงบนฉาก</p><p>วงที่ตกบนฉากด้านหน้า ${rings.filter((r) => r.onScreen).length} วง จาก ${rings.length} อันดับที่คำนวณได้</p><p>${db.V >= 3000 ? "ที่ศักย์สูงมาก ความเร็วจริงต่ำกว่าสูตรไม่สัมพัทธภาพเล็กน้อย แบบเรียน ม.6 ใช้สูตรนี้" : "ช่วงศักย์นี้สูตรไม่สัมพัทธภาพของแบบเรียนใช้ได้ดี"}</p>`;
-      $("hudStatus").textContent = "λ = " + db.lam.toFixed(4) + " nm";
-      $("caption").textContent = "อิเล็กตรอนที่ถูกเร่งมีโมเมนตัมสูงขึ้น ความยาวคลื่นของตัวอิเล็กตรอนจึงสั้นลง วงเลี้ยวเบนบนฉากเลยเล็กลง";
-      $("legend").textContent = "คลื่นสีฟ้าคือภาพความยาวคลื่นเดอบรอยล์ที่ขยายให้มองเห็น ไม่ใช่แสงที่อิเล็กตรอนปล่อยออกมา";
+      $("cards4").innerHTML = `<div class="eq">คลื่นของอิเล็กตรอนยาว ${db.lam.toFixed(4)} nm<br>เร็ว ${sci(db.v)} m/s<br>เห็นวงบนฉาก ${rings.filter((r) => r.onScreen).length} วง</div><p>คลื่นสีฟ้าเป็นคลื่นของตัวอิเล็กตรอนเอง ไม่ใช่แสงที่มันส่องออกมา</p>`;
+      $("hudStatus").textContent = "คลื่นยาว " + db.lam.toFixed(3) + " nm";
+      $("caption").textContent = "ศักย์สูงทำให้อิเล็กตรอนเร็วขึ้น คลื่นของมันจึงสั้นลง และวงบนฉากเล็กลง";
     } else {
       const u = uncCalc();
       $("meterDx").textContent = state.dxNm.toFixed(3) + " nm";
       $("meterDp").textContent = sci(u.dp);
       const orbText = state.orbital === "1s"
-        ? "1s เป็นกลุ่มหมอกทรงกลม ความน่าจะเป็นหนาแน่นใกล้บริเวณนิวเคลียสมากกว่าด้านนอก"
+        ? "1s คือกลุ่มกลม โอกาสพบมากใกล้กลางอะตอม"
         : state.orbital === "2s"
-          ? "2s มีผิวโหนดคั่นระหว่างแกนในกับเปลือกนอก จึงไม่ใช่ก้อนทึบก้อนเดียว"
-          : "2p เป็นสองพูตามแกนดิ่ง มีระนาบโหนดตรงกลาง ความน่าจะเป็นเป็นศูนย์บนระนาบนั้น";
-      $("cards5").innerHTML = `<div class="eq">Δx = ${state.dxNm.toFixed(3)} nm = ${sci(u.dx)} m<br>Δp ≥ h/(4πΔx) = ${sci(u.dp)} kg·m/s<br>Δv ≥ Δp/m = ${sci(u.dv)} m/s<br>Δx·Δp = ${sci(u.product)} J·s<br>ℏ/2 = h/4π = ${sci(u.limit)} J·s</div><p>${orbText}</p><p>แบบจำลองนี้ใช้ค่าต่ำสุดของหลักความไม่แน่นอน พอดีกับขอบ ℏ/2</p><p>${Math.abs(state.dxNm - 0.053) < 0.008 ? "ที่ความกว้างประมาณรัศมีโบร์ Δv มีค่าใกล้เคียงอัตราเร็วในแบบโบร์ จึงระบุทั้งตำแหน่งบนวงและโมเมนตัมพร้อมกันไม่ได้" : "ลองเลื่อน Δx ไปใกล้ 0.053 nm เพื่อเทียบกับรัศมีโบร์"}</p>`;
-      $("hudStatus").textContent = "Δx Δp = ℏ/2";
-      $("caption").textContent = "กลุ่มหมอกด้านบนคือความน่าจะเป็นที่จะพบอิเล็กตรอน แพ็กเก็ตด้านล่างแสดงว่าถ้าเริ่มจับตำแหน่งให้แคบ มันจะกระจายเร็วเพราะโมเมนตัมกำกวม";
-      $("legend").textContent = "กราฟสองใบใช้แกนคงที่: เมื่อ Δx แคบลง กราฟตำแหน่งจะบางและกราฟโมเมนตัมจะกว้าง";
+          ? "2s มีช่องว่างคั่นระหว่างแกนในกับเปลือกนอก"
+          : "2p เป็นสองพู ตรงกลางระหว่างพูแทบไม่พบอิเล็กตรอน";
+      $("cards5").innerHTML = `<div class="eq">จับตำแหน่งได้ละเอียด ${state.dxNm.toFixed(3)} nm<br>ความเร็วจึงกำกวมอย่างน้อย ${sci(u.dv)} m/s</div><p>${orbText}</p>`;
+      $("hudStatus").textContent = "";
+      $("caption").textContent = "ยิ่งพยายามระบุว่าอิเล็กตรอนอยู่จุดไหน ความเร็วของมันยิ่งบอกไม่ได้แน่นอน";
     }
     updateMis();
   }
@@ -1810,54 +1792,53 @@
     let title = "ข้อควรสังเกต";
     let text = "";
     if (state.mode === 1) {
-      text = "แบบจำลองทอมสันคาดว่าอนุภาคแอลฟาทุกตัวจะเบี่ยงเพียงเล็กน้อย เพราะคิดว่าประจุบวกกระจายทั่วอะตอม ผลการทดลองไม่เป็นอย่างนั้น ส่วนใหญ่พุ่งเกือบตรง และมีบางส่วนเบี่ยงมุมมากหรือสะท้อนกลับ แสดงว่าประจุบวกและมวลรวมอยู่ที่นิวเคลียสขนาดเล็กมาก";
+      title = "สรุปจากภาพ";
+      text = "ถ้านิวเคลียสใหญ่และประจุกระจายทั่ว อะตอมควรทำให้ทุกอนุภาคเลี้ยวนิดเดียว แต่ในภาพมีทั้งเส้นตรงและเส้นที่สะท้อนกลับ แสดงว่าประจุบวกกองอยู่ที่จุดเล็กมากตรงกลาง";
       if (state.hint === "energy") {
-        warn = true;
-        title = "จุดที่มักเข้าใจคลาดเคลื่อน";
-        text = "การเพิ่มพลังงานของอนุภาคแอลฟาไม่ได้ทำให้นิวเคลียสใหญ่ขึ้น มันทำให้ระยะเข้าใกล้สุด d₀ สั้นลง อนุภาคจึงเลี้ยวได้น้อยลง มุมกระเจิงขึ้นกับระยะกระทบและแรงคูลอมบ์";
+        text = "เพิ่มพลังงานแล้วอนุภาคเลี้ยวน้อยลง เพราะมันพุ่งเข้าใกล้ได้มากขึ้นก่อนจะถูกผลักกลับ ไม่ใช่เพราะนิวเคลียสเล็กลง";
       }
     } else if (state.mode === 2) {
       const ph = photoCalc();
       if (!ph.active) {
         warn = true;
-        title = "จุดที่มักเข้าใจคลาดเคลื่อน";
-        text = "โฟตอนแต่ละก้อนมีพลังงาน " + ph.E.toFixed(2) + " eV ซึ่งน้อยกว่าฟังก์ชันงาน " + ph.W.toFixed(2) + " eV อิเล็กตรอนจึงไม่หลุด แม้เลื่อนความเข้มจนสว่างมากก็ยังไม่มีกระแส เพราะความเข้มเพิ่มจำนวนโฟตอน ไม่ได้เพิ่มพลังงานต่อโฟตอน";
+        title = "ทำไมไม่หลุด";
+        text = "แสงหนึ่งก้อนมีพลังงาน " + ph.E.toFixed(2) + " eV แต่งานที่ต้องใช้ดึงอิเล็กตรอนคือ " + ph.W.toFixed(2) + " eV ทำให้สว่างขึ้นไม่ได้ช่วย เพราะสว่างแค่มีก้อนแสงมากขึ้น แต่ละก้อนยังพลังงานเท่าเดิม";
       } else if (state.hint === "intensity") {
         warn = true;
-        title = "จุดที่มักเข้าใจคลาดเคลื่อน";
-        text = "คุณเพิ่งปรับความเข้มแสง จำนวนโฟตอนต่อวินาทีเปลี่ยน กระแสจึงเปลี่ยน แต่ Ek,max ยังเป็น " + ph.Ek.toFixed(2) + " eV เท่าเดิม เพราะความถี่ไม่เปลี่ยน ความเข้มไม่ใช่ตัวกำหนดพลังงานจลน์สูงสุด";
+        title = "อย่าสับสนสองอย่างนี้";
+        text = "ความสว่างเปลี่ยนจำนวนอิเล็กตรอนที่หลุด พลังงานของอิเล็กตรอนแต่ละตัวยังเป็น " + ph.Ek.toFixed(2) + " eV เท่าเดิม";
       } else if (state.voltage <= -ph.Vs) {
         warn = true;
-        title = "จุดที่มักเข้าใจคลาดเคลื่อน";
-        text = "อิเล็กตรอนหลุดออกจากผิวได้ แต่ศักย์ย้อนกลับดึงมันกลับจนครบทุกตัวเมื่อ e|V| ≥ Ek,max จุดที่กระแสเพิ่งเป็นศูนย์คือความต่างศักย์หยุดยั้ง Vs = " + ph.Vs.toFixed(2) + " V ไม่ใช่ว่าแสงหยุดทำให้อิเล็กตรอนหลุด";
+        title = "กระแสเป็นศูนย์แปลว่าอะไร";
+        text = "อิเล็กตรอนยังหลุดจากโลหะได้ แต่ศักย์ลบดึงมันกลับหมดก่อนถึงแอโนด จุดที่กระแสเพิ่งหายคือศักย์หยุดยั้ง " + ph.Vs.toFixed(2) + " V";
       } else if (state.hint === "lambda" || state.hint === "metal") {
-        text = "ความถี่หรือชนิดโลหะเปลี่ยน ทำให้ hf หรือ W เปลี่ยน Ek,max และ Vs จึงเลื่อนตาม กราฟ Ek กับ f มีความชันเท่ากับ h และตัดแกนความถี่ที่ f₀ = W/h";
+        title = "สรุปจากภาพ";
+        text = "เปลี่ยนสีแสงหรือชนิดโลหะ แล้วพลังงานที่เหลือของอิเล็กตรอนจะเปลี่ยนตาม";
       } else {
-        text = "แสงประพฤติตัวเป็นก้อนพลังงาน เรียกว่าโฟตอน หนึ่งโฟตอนปลดปล่อยอิเล็กตรอนได้หนึ่งตัว ส่วนพลังงานที่เหลือเป็นพลังงานจลน์ ตามสมการ hf = W + Ek,max";
+        title = "สรุปจากภาพ";
+        text = "แสงหนึ่งก้อนให้อิเล็กตรอนได้หนึ่งตัว พลังงานที่เหลือหลังหักงานดึงผิว คือพลังงานจลน์ของอิเล็กตรอน";
       }
     } else if (state.mode === 3) {
       if (state.hint === "wrong") {
         warn = true;
-        title = "จุดที่มักเข้าใจคลาดเคลื่อน";
-        text = "โฟตอนจะถูกดูดกลืนก็ต่อเมื่อพลังงานเท่ากับผลต่างของระดับพลังงานพอดี โฟตอนที่พลังงานไม่ตรงจะทะลุไป อิเล็กตรอนไม่กระโดดชั้น ข้อยกเว้นคือโฟตอนพลังงานสูงพอจะทำไอออไนเซชัน";
+        title = "ทำไมไม่ถูกดูด";
+        text = "อะตอมรับแสงเฉพาะก้อนที่พลังงานตรงกับช่องระหว่างชั้นพอดี ก้อนที่ไม่ตรงจะทะลุไป อิเล็กตรอนไม่ขยับ";
       } else if (state.ni === state.nf) {
         warn = true;
-        title = "จุดที่มักเข้าใจคลาดเคลื่อน";
-        text = "ระดับต้นและระดับปลายเป็นชั้นเดียวกัน ΔE = 0 ไม่มีโฟตอนถูกปล่อยหรือดูดกลืน และอิเล็กตรอนก็ไม่ลอยอยู่ระหว่างชั้นได้";
+        title = "ยังไม่มีการกระโดด";
+        text = "เลือกชั้นต้นกับชั้นปลายคนละชั้น อิเล็กตรอนถึงจะปล่อยหรือดูดแสง";
       } else {
-        text = "อิเล็กตรอนอยู่ในได้เฉพาะระดับพลังงานที่กำหนด ไม่ได้โคจรค้างระหว่างชั้น พลังงานเป็นลบเพราะยึดสถานะอิสระที่ไกลอนันต์เป็นศูนย์ ชั้นในผูกแน่นกว่าจึงติดลบมากกว่า";
+        title = "สรุปจากภาพ";
+        text = "ชั้นในผูกอิเล็กตรอนแน่นกว่า เลขบนกราฟจึงติดลบมากกว่า ชั้นนอกหลวมกว่าและใกล้ศูนย์";
       }
     } else if (state.mode === 4) {
-      warn = state.hint === "vacc";
-      title = warn ? "จุดที่มักเข้าใจคลาดเคลื่อน" : "ข้อควรสังเกต";
-      text = "ความยาวคลื่นเดอบรอยล์เป็นสมบัติคลื่นของตัวอนุภาค ไม่ใช่คลื่นแม่เหล็กไฟฟ้าที่วัตถุแผ่ออกมาระหว่างเคลื่อนที่ ลูกเบสบอลมวล 0.15 kg เร็ว 30 m/s มี λ ประมาณ 1.5×10⁻³⁴ m เล็กเกินกว่าจะเห็นการเลี้ยวเบน แต่อิเล็กตรอนในภาพนี้มี λ ระดับพิโกเมตรถึงอังสตรอม จึงเลี้ยวเบนผ่านผลึกได้";
+      title = "คลื่นนี้คืออะไร";
+      text = "คลื่นในภาพเป็นคลื่นของตัวอิเล็กตรอน ไม่ใช่แสงที่อิเล็กตรอนส่องออกมา วัตถุใหญ่อย่างลูกบอลมีคลื่นแบบนี้สั้นจนมองไม่เห็นการเลี้ยวเบน";
     } else {
-      const tight = state.dxNm < 0.03;
-      warn = tight || state.hint === "dx";
-      title = warn ? "จุดที่มักเข้าใจคลาดเคลื่อน" : "ข้อควรสังเกต";
-      text = tight
-        ? "การบีบ Δx ให้แคบมากไม่ได้ทำให้อิเล็กตรอนนิ่งสนิทที่จุดนั้น โมเมนตัมยิ่งกำกวม และแพ็กเก็ตจะกระจายเร็ว อิเล็กตรอนในอะตอมจึงถูกบรรยายเป็นกลุ่มหมอกความน่าจะเป็น ไม่ใช่ก้อนกลมบนราง"
-        : "หลักความไม่แน่นอน Δx Δp ≥ ℏ/2 บอกว่าตำแหน่งกับโมเมนตัมตามแกนเดียวกันบอกพร้อมกันได้ละเอียดจำกัด แบบจำลองกลุ่มหมอกคือภาพความน่าจะเป็นที่จะพบอิเล็กตรอน ไม่ใช่ภาพถ่ายของก้อนประจุที่กำลังวิ่งเป็นวง";
+      title = "ทำไมไม่ใช่วงโคจร";
+      text = state.dxNm < 0.03
+        ? "บีบตำแหน่งให้แคบมากไม่ได้ทำให้อิเล็กตรอนนิ่งที่จุดนั้น มันยิ่งกระจายเร็ว จึงวาดได้แค่กลุ่มหมอกของโอกาสที่จะพบ"
+        : "เราระบุตำแหน่งกับความเร็วพร้อมกันให้เป๊ะไม่ได้ ภาพที่ตรงกับความจริงคือกลุ่มหมอกของโอกาสที่จะพบอิเล็กตรอน";
     }
     box.classList.toggle("warn", warn);
     $("misTitle").textContent = title;
@@ -1871,7 +1852,6 @@
     }
     const L = photoLayout(sim.getBoundingClientRect().width, sim.getBoundingClientRect().height);
     const n = step ? Math.max(1, Math.round(state.intensity / 18)) : 1;
-    const ph = photoCalc();
     for (let i = 0; i < n; i++) {
       state.photons.push({
         x: sim.getBoundingClientRect().width * 0.1,
@@ -2079,11 +2059,11 @@
       el.classList.add("m" + mode);
     });
     const hints = {
-      1: "ยิงอนุภาคแอลฟาหนึ่งอนุภาค",
-      2: "ยิงโฟตอนชุดหนึ่ง",
-      3: "เกิดการเปลี่ยนระดับหนึ่งครั้ง",
-      4: "ยิงอิเล็กตรอนหนึ่งตัว",
-      5: "ปล่อยแพ็กเก็ตคลื่นหนึ่งครั้ง"
+      1: "ปุ่มทีละครั้งจะยิง 1 อนุภาค",
+      2: "ปุ่มทีละครั้งจะยิงแสง 1 ชุด",
+      3: "ปุ่มทีละครั้งจะให้กระโดด 1 ครั้ง",
+      4: "ปุ่มทีละครั้งจะยิงอิเล็กตรอน 1 ตัว",
+      5: "ปุ่มทีละครั้งจะแสดงการกระจาย 1 รอบ"
     };
     $("stepHint").textContent = hints[mode];
     updateReadouts();
