@@ -32,44 +32,38 @@
     font-size: 14.5px;
     line-height: 1.45;
   }
-  header {
-    height: 64px;
+  .app { height: 100%; position: relative; overflow: hidden; }
+  .topbar {
+    position: absolute;
+    top: 12px; left: 12px; right: 12px;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    background: rgba(8, 14, 26, 0.72);
+    backdrop-filter: blur(14px);
+    box-shadow: var(--shadow);
+  }
+  .brand { min-width: 132px; }
+  .brand h1 { font-size: 18px; margin: 0; font-weight: 700; }
+  .brand h1 span { color: var(--gold); }
+  .brand p { margin: 0; color: var(--muted); font-size: 11.5px; }
+  .topbar select { flex: 1; min-width: 0; max-width: 460px; }
+  .topbar .transport { margin-top: 0; display: flex; flex: 0 0 auto; gap: 6px; }
+  .topbar .transport button { white-space: nowrap; padding: 8px 10px; }
+  .pad { padding: 14px; }
+  .sheet-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 0 18px;
-    border-bottom: 1px solid var(--line);
-    background: rgba(7, 16, 28, 0.9);
-  }
-  header h1 { font-size: 20px; margin: 0; font-weight: 700; letter-spacing: 0.01em; }
-  header h1 span { color: var(--gold); }
-  header p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
-  .layout {
-    height: calc(100vh - 64px);
-    display: grid;
-    grid-template-columns: 318px minmax(0, 1fr) 368px;
-    gap: 12px;
-    padding: 12px;
-  }
-  .col {
-    min-height: 0;
-    overflow: auto;
-    background: rgba(12, 23, 40, 0.92);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-  }
-  .col.center {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
     gap: 8px;
+    margin-bottom: 8px;
   }
-  .pad { padding: 14px; }
+  .sheet-head h2 { margin: 0; }
+  .sheet-close { padding: 6px 10px; }
   h2 { font-size: 13px; margin: 14px 0 8px; color: var(--gold); font-weight: 700; letter-spacing: 0.02em; }
   h2:first-child { margin-top: 0; }
   label.row, .slider-label {
@@ -137,29 +131,95 @@
     box-shadow: 0 0 0 2px rgba(0,0,0,0.35);
   }
   .hintline { color: var(--muted); font-size: 12.5px; margin: 6px 0 0; }
-  .stage {
-    flex: 1;
-    min-height: 460px;
-    position: relative;
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    background: #070d18;
-  }
+  .stage { position: absolute; inset: 0; background: #070d18; }
   #sim { width: 100%; height: 100%; display: block; }
   .hud {
     position: absolute;
-    left: 12px; right: 12px; top: 10px;
+    left: 16px; right: 16px; top: 78px;
     display: flex;
     justify-content: space-between;
     gap: 10px;
     pointer-events: none;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
     font-size: 13px;
   }
   .hud b { font-weight: 700; }
+  .note {
+    position: absolute;
+    left: 50%;
+    bottom: 86px;
+    transform: translateX(-50%);
+    width: min(680px, calc(100% - 300px));
+    text-align: center;
+    pointer-events: none;
+    padding: 8px 14px;
+    border-radius: 14px;
+    background: rgba(7, 14, 26, 0.58);
+    border: 1px solid rgba(176, 206, 245, 0.14);
+    backdrop-filter: blur(10px);
+  }
   #caption, #legend { margin: 0; color: var(--muted); font-size: 13px; }
   #caption { color: var(--text); }
+  .scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background: rgba(3, 6, 12, 0.28);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .scrim.show { opacity: 1; pointer-events: auto; }
+  .sheet {
+    position: absolute;
+    top: 78px;
+    bottom: 84px;
+    z-index: 30;
+    width: min(390px, calc(100vw - 28px));
+    overflow: auto;
+    background: rgba(10, 18, 32, 0.94);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(16px);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(56px);
+    transition: transform 0.46s cubic-bezier(0.16, 1.55, 0.32, 1), opacity 0.18s ease;
+  }
+  .sheet-left { left: 14px; }
+  .sheet-right { right: 14px; width: min(430px, calc(100vw - 28px)); }
+  .sheet.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .fab {
+    position: absolute;
+    bottom: 18px;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border-radius: 999px;
+    font-weight: 700;
+    background: rgba(12, 22, 38, 0.9);
+    border: 1px solid rgba(231, 199, 138, 0.55);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  }
+  .fab-left { left: 16px; }
+  .fab-right { right: 16px; }
+  .fab .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 10px var(--gold);
+  }
+  .fab.on {
+    background: #13584c;
+    border-color: var(--teal);
+  }
+  .fab.on .dot { background: var(--teal); box-shadow: 0 0 10px var(--teal); }
   .block { padding: 12px 12px 4px; }
   .graph {
     width: 100%;
@@ -220,24 +280,30 @@
     margin: 0;
   }
   .keys { color: var(--muted); font-size: 12px; margin-top: 10px; }
-  @media (max-width: 1180px) {
-    body { height: auto; }
-    .layout { height: auto; grid-template-columns: 1fr; }
-    .stage { height: 72vh; }
-    header { height: auto; padding: 12px 14px; align-items: flex-start; }
+  @media (max-width: 860px) {
+    .topbar { flex-wrap: wrap; }
+    .topbar select { width: 100%; max-width: none; order: 3; }
+    .note { width: calc(100% - 24px); bottom: 76px; }
+    .sheet, .sheet-right { left: 10px; right: 10px; width: auto; top: 128px; }
+    .hud { top: 124px; }
   }
 </style>
 </head>
 <body>
-<header>
-  <div>
-    <h1>ฟิสิกส์<span>อะตอม</span></h1>
-    <p>สื่อจำลองเชิงโต้ตอบ · ฟิสิกส์เพิ่มเติม ม.6 · ตามแนวแบบเรียน สสวท.</p>
+<div class="app">
+  <div class="stage">
+    <canvas id="sim"></canvas>
+    <div class="hud"><b id="hudTitle"></b><span id="hudStatus"></span></div>
+    <div class="note">
+      <p id="caption"></p>
+      <p id="legend"></p>
+    </div>
   </div>
-</header>
-<div class="layout">
-  <section class="col pad modecol m1" id="leftCol">
-    <h2>โหมดการทดลอง</h2>
+  <header class="topbar">
+    <div class="brand">
+      <h1>ฟิสิกส์<span>อะตอม</span></h1>
+      <p>ม.6 · ตามแนว สสวท.</p>
+    </div>
     <select id="modeSelect">
       <option value="1">1. การกระเจิงรังสีแอลฟาของรัทเทอร์ฟอร์ด</option>
       <option value="2">2. ปรากฏการณ์โฟโตอิเล็กทริก</option>
@@ -250,6 +316,13 @@
       <button type="button" id="pauseBtn">หยุดชั่วคราว</button>
       <button type="button" id="stepBtn">ทีละครั้ง</button>
       <button type="button" id="resetBtn">ตั้งค่าใหม่</button>
+    </div>
+  </header>
+  <div class="scrim" id="scrim"></div>
+  <section class="sheet sheet-left pad modecol m1" id="leftCol">
+    <div class="sheet-head">
+      <h2>ปรับค่าการทดลอง</h2>
+      <button type="button" class="sheet-close" id="closeControls">ปิด</button>
     </div>
     <p class="hintline" id="stepHint">ยิงอนุภาคแอลฟาหนึ่งอนุภาค</p>
 
@@ -343,19 +416,14 @@
       </div>
       <p class="hintline">1s ทรงกลม · 2s มีโหนด · 2p สองพู ภาพนี้คือความน่าจะเป็น ไม่ใช่ทางโคจรเส้นบาง</p>
     </div>
-    <p class="keys">แป้นพิมพ์: Space เริ่ม/หยุด · S ทีละครั้ง · R ตั้งค่าใหม่</p>
+    <p class="keys">แป้นพิมพ์: Space เริ่ม/หยุด · S ทีละครั้ง · R ตั้งค่าใหม่ · Esc ปิดแผง</p>
   </section>
 
-  <section class="col center">
-    <div class="stage">
-      <div class="hud"><b id="hudTitle"></b><span id="hudStatus"></span></div>
-      <canvas id="sim"></canvas>
+  <aside class="sheet sheet-right modecol m1" id="rightCol">
+    <div class="sheet-head pad" style="padding-bottom:0">
+      <h2>กราฟและการคำนวณ</h2>
+      <button type="button" class="sheet-close" id="closeGraphs">ปิด</button>
     </div>
-    <p id="caption"></p>
-    <p id="legend"></p>
-  </section>
-
-  <aside class="col modecol m1" id="rightCol">
     <div class="block meters only o2">
       <div class="meter" id="ammeterBox"><div class="k">แอมมิเตอร์ · กระแสโฟโตอิเล็กตรอน</div><div class="v" id="ammeter">0.00 µA</div></div>
       <div class="meter" id="voltmeterBox"><div class="k">โวลต์มิเตอร์ · V ที่ตั้งไว้</div><div class="v" id="voltmeter">0.00 V</div></div>
@@ -396,6 +464,8 @@
     </div>
     <p class="consts">ค่าคงที่ตามแบบเรียน: h = 6.626×10⁻³⁴ J·s = 4.14×10⁻¹⁵ eV·s · hc ≈ 1240 eV·nm · R_H = 1.097×10⁷ m⁻¹ · r₁ = 0.053 nm · E₁ = −13.6 eV</p>
   </aside>
+  <button type="button" class="fab fab-left" id="fabControls" aria-expanded="false"><span class="dot"></span>ปรับค่า</button>
+  <button type="button" class="fab fab-right" id="fabGraphs" aria-expanded="false"><span class="dot"></span>กราฟ</button>
 </div>
 <script>
 (() => {
@@ -2203,6 +2273,22 @@
         state.cloud = sampleCloud(state.orbital, 1100);
       });
     });
+    function setSheet(which) {
+      const left = which === "left";
+      const right = which === "right";
+      $("leftCol").classList.toggle("open", left);
+      $("rightCol").classList.toggle("open", right);
+      $("fabControls").classList.toggle("on", left);
+      $("fabGraphs").classList.toggle("on", right);
+      $("fabControls").setAttribute("aria-expanded", left ? "true" : "false");
+      $("fabGraphs").setAttribute("aria-expanded", right ? "true" : "false");
+      $("scrim").classList.toggle("show", left || right);
+    }
+    $("fabControls").addEventListener("click", () => setSheet($("leftCol").classList.contains("open") ? null : "left"));
+    $("fabGraphs").addEventListener("click", () => setSheet($("rightCol").classList.contains("open") ? null : "right"));
+    $("closeControls").addEventListener("click", () => setSheet(null));
+    $("closeGraphs").addEventListener("click", () => setSheet(null));
+    $("scrim").addEventListener("click", () => setSheet(null));
     sim.addEventListener("click", (ev) => {
       if (state.mode !== 1) return;
       const rect = sim.getBoundingClientRect();
@@ -2213,6 +2299,7 @@
       if (state.run !== "play") state.run = "step";
     });
     window.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape") { setSheet(null); return; }
       if (ev.target && ["INPUT", "SELECT", "TEXTAREA", "BUTTON"].includes(ev.target.tagName)) return;
       if (ev.code === "Space") { ev.preventDefault(); state.run = state.run === "play" ? "stop" : "play"; }
       else if (ev.key === "s" || ev.key === "S") doStep();
